@@ -21,3 +21,6 @@ htmlcov/
 # Private strategy / internal-only docs (never commit)
 STRATEGY.md
 docs/internal/
+
+# Zenodo deposit staging — build artifact, regenerated as needed
+zenodo_deposit/
