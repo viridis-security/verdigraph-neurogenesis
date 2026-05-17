@@ -1,0 +1,42 @@
+{
+  "agent_name": "Hypothetical Service Operations Agent",
+  "purpose": "Coordinate service requests by classifying user needs, checking policy, routing to tools, drafting responses, and evaluating outcomes.",
+  "initial_nodes": [
+    "request_classifier",
+    "policy_checker",
+    "workflow_planner",
+    "tool_router",
+    "response_drafter",
+    "safety_checker",
+    "evaluation_engine",
+    "ledger"
+  ],
+  "growth_rules": {
+    "create_node_when_task_repeats": 4,
+    "strengthen_edge_on_success": 0.07,
+    "weaken_edge_on_failure": 0.05,
+    "prune_below_weight": 0.12,
+    "max_nodes": 80,
+    "max_edges": 300,
+    "min_events_before_pruning": 4
+  },
+  "fitness_metrics": [
+    "task_success",
+    "response_quality",
+    "latency",
+    "cost_efficiency",
+    "safety_score"
+  ],
+  "safety_axioms": {
+    "protected_nodes": ["policy_checker", "safety_checker", "evaluation_engine", "ledger"],
+    "require_growth_logging": true,
+    "require_pruning_logging": true,
+    "disallow_hidden_nodes": true,
+    "disallow_pruning_protected_nodes": true,
+    "require_purpose_for_new_nodes": true
+  },
+  "metadata": {
+    "version": "0.1.0",
+    "domain": "hypothetical-service-operations"
+  }
+}

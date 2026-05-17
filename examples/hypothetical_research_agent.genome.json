@@ -1,0 +1,46 @@
+{
+  "agent_name": "Hypothetical Research Assistant",
+  "purpose": "Assist with general research workflows by routing tasks through planning, search, synthesis, citation checking, and final review modules.",
+  "initial_nodes": [
+    "intent_classifier",
+    "planner",
+    "search_module",
+    "synthesis_module",
+    "citation_checker",
+    "safety_checker",
+    "evaluation_engine",
+    "ledger"
+  ],
+  "growth_rules": {
+    "create_node_when_task_repeats": 3,
+    "strengthen_edge_on_success": 0.08,
+    "weaken_edge_on_failure": 0.06,
+    "prune_below_weight": 0.15,
+    "max_nodes": 64,
+    "max_edges": 256,
+    "min_events_before_pruning": 3
+  },
+  "fitness_metrics": [
+    "task_success",
+    "factual_accuracy",
+    "citation_quality",
+    "cost_efficiency",
+    "safety_score"
+  ],
+  "safety_axioms": {
+    "protected_nodes": ["safety_checker", "evaluation_engine", "ledger"],
+    "require_growth_logging": true,
+    "require_pruning_logging": true,
+    "disallow_hidden_nodes": true,
+    "disallow_pruning_protected_nodes": true,
+    "require_purpose_for_new_nodes": true,
+    "custom": {
+      "require_sources_for_external_claims": true,
+      "require_human_review_for_external_actions": true
+    }
+  },
+  "metadata": {
+    "version": "0.1.0",
+    "domain": "hypothetical-general-research"
+  }
+}

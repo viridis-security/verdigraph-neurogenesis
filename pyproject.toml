@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "axiomgraph-neurogenesis"
+version = "0.1.0"
+description = "A software framework for self-evolving AI-agent cognitive graphs."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "AxiomGraph Contributors" }]
+license = { text = "MIT" }
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["axiomgraph*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
