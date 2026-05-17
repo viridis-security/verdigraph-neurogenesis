@@ -92,6 +92,16 @@ verdigraph-mcp
 
 See [docs/MCP_SERVER.md](docs/MCP_SERVER.md) for the full tool list and a `claude_desktop_config.json` snippet.
 
+## The Viridis Operator agent — Verdigraph operating Verdigraph
+
+The repo ships with a reference operator agent that uses Verdigraph to operate the Verdigraph project itself:
+
+```bash
+python examples/viridis_operator_demo.py
+```
+
+It triages issues, reviews PRs, plans releases, updates docs, and routes compute through the cheapest reliable path — with everything logged in an auditable developmental ledger. See [docs/OPERATOR_AGENT.md](docs/OPERATOR_AGENT.md) for the full operational pattern and Claude Desktop / Cowork configuration.
+
 ## Cite this work
 
 This release is permanently archived on Zenodo with a citable DOI.

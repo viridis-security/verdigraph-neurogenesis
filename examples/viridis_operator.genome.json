@@ -1,0 +1,70 @@
+{
+  "agent_name": "Viridis Operator",
+  "purpose": "Operate the Verdigraph NeuroGenesis project on behalf of Viridis LLC. Triage incoming GitHub issues, review pull requests, plan releases, keep documentation current, run the test suite on proposed changes, route compute decisions through the cheapest reliable path, and maintain an auditable developmental ledger of every action taken. The agent operates the framework on which it itself runs — Verdigraph operating Verdigraph.",
+  "initial_nodes": [
+    "intent_classifier",
+    "issue_triage",
+    "code_review",
+    "release_planner",
+    "docs_updater",
+    "test_runner",
+    "github_router",
+    "verdigraph_router",
+    "compute_optimizer",
+    "safety_checker",
+    "evaluation_engine",
+    "ledger"
+  ],
+  "growth_rules": {
+    "create_node_when_task_repeats": 5,
+    "strengthen_edge_on_success": 0.07,
+    "weaken_edge_on_failure": 0.05,
+    "prune_below_weight": 0.12,
+    "max_nodes": 64,
+    "max_edges": 256,
+    "min_events_before_pruning": 4,
+    "max_weight": 1.0,
+    "min_weight": 0.0
+  },
+  "fitness_metrics": [
+    "task_success",
+    "code_quality",
+    "response_time",
+    "compute_efficiency",
+    "safety_score",
+    "documentation_freshness"
+  ],
+  "safety_axioms": {
+    "protected_nodes": [
+      "github_router",
+      "verdigraph_router",
+      "safety_checker",
+      "evaluation_engine",
+      "ledger"
+    ],
+    "require_growth_logging": true,
+    "require_pruning_logging": true,
+    "disallow_hidden_nodes": true,
+    "disallow_pruning_protected_nodes": true,
+    "require_purpose_for_new_nodes": true,
+    "custom": {
+      "require_human_review_for_release": true,
+      "require_human_review_for_destructive_github_action": true,
+      "require_test_suite_green_before_merge_review": true,
+      "max_outbound_github_writes_per_hour": 30,
+      "compute_quality_floor": 0.70
+    }
+  },
+  "metadata": {
+    "version": "0.1.0",
+    "domain": "verdigraph-project-operations",
+    "operator_of": "verdigraph-neurogenesis",
+    "operator_for": "Viridis LLC",
+    "connected_mcps": [
+      "verdigraph-mcp (stdio, axiomgraph_neurogenesis)",
+      "github-mcp (github/github-mcp-server, configured separately)"
+    ],
+    "deploys_via": "Claude Desktop / Cowork / Claude Code with both MCPs connected",
+    "thermodynamic_alignment": "Operator decisions are scored by Cognitive Efficiency = Task Success / Compute Cost per Verdigraph Paper 3 and Intelligence Bound (Hart, in submission)."
+  }
+}
