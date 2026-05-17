@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AxiomGraph Compute Cost Calculator</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #2ea043;
+    --accent-soft: #1f6f33;
+    --warn: #d29922;
+    --danger: #f85149;
+    --link: #58a6ff;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: var(--sans); }
+  body { max-width: 1100px; margin: 0 auto; padding: 32px 24px 64px; line-height: 1.55; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 28px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 18px; margin: 0 0 12px; color: var(--muted); font-weight: 500; }
+  h3 { font-size: 15px; margin: 24px 0 10px; letter-spacing: 0.5px; text-transform: uppercase; color: var(--muted); }
+  .tag { display: inline-block; background: var(--accent-soft); color: #fff; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-left: 8px; vertical-align: middle; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 20px; }
+  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+  .row { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; }
+  .row > * { flex: 1; }
+  input[type="number"], select {
+    background: #010409; border: 1px solid var(--border); color: var(--text);
+    padding: 8px 10px; border-radius: 6px; font-family: var(--mono); font-size: 14px;
+    width: 100%;
+  }
+  input[type="number"]:focus, select:focus { outline: 2px solid var(--link); }
+  .field { margin-bottom: 14px; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .metric { display: flex; justify-content: space-between; align-items: baseline; padding: 10px 0; border-bottom: 1px dashed var(--border); }
+  .metric:last-child { border-bottom: none; }
+  .metric .lbl { color: var(--muted); font-size: 13px; }
+  .metric .val { font-family: var(--mono); font-size: 18px; }
+  .big {
+    background: linear-gradient(180deg, rgba(46,160,67,0.18), rgba(46,160,67,0.04));
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 18px 20px; margin: 14px 0;
+  }
+  .big .row1 { display: flex; justify-content: space-between; align-items: baseline; }
+  .big .num { font-family: var(--mono); font-size: 32px; color: var(--accent); }
+  .big .small { color: var(--muted); font-size: 13px; }
+  .bar-wrap { background: var(--bg); border: 1px solid var(--border); height: 18px; border-radius: 4px; overflow: hidden; position: relative; }
+  .bar { height: 100%; background: var(--accent); transition: width 200ms ease; }
+  .legend { display: flex; gap: 16px; font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; vertical-align: middle; margin-right: 4px; }
+  footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 12px; }
+  a { color: var(--link); }
+  .assumptions { font-size: 12px; color: var(--muted); }
+  .assumptions summary { cursor: pointer; padding: 6px 0; color: var(--link); }
+  .assumptions ul { margin: 6px 0 0 18px; padding: 0; }
+  .assumptions li { margin-bottom: 4px; }
+  .savings-mode { display: flex; gap: 8px; margin-bottom: 8px; }
+  .savings-mode button {
+    background: var(--bg); border: 1px solid var(--border); color: var(--text);
+    padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px;
+  }
+  .savings-mode button.active { background: var(--accent-soft); border-color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>AxiomGraph Compute Cost Calculator <span class="tag">demo</span></h1>
+  <h2>Estimate the compute spend, electricity, and CO2e you can recover by routing tasks through a developmental cognitive graph.</h2>
+</header>
+
+<div class="grid">
+  <!-- ============================== INPUTS =============================== -->
+  <div class="panel" id="inputs">
+    <h3>Your current AI agent stack</h3>
+
+    <div class="field">
+      <label for="monthly_spend">Monthly AI compute spend (USD)</label>
+      <input type="number" id="monthly_spend" value="20000" min="0" step="100" />
+      <div class="hint">Frontier API + mid-tier + local-GPU electricity, combined.</div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label for="frontier_pct">Frontier-model share (%)</label>
+        <input type="number" id="frontier_pct" value="65" min="0" max="100" step="1" />
+        <div class="hint">Calls to GPT-class / Claude-class APIs.</div>
+      </div>
+      <div class="field">
+        <label for="midtier_pct">Mid-tier / specialized share (%)</label>
+        <input type="number" id="midtier_pct" value="25" min="0" max="100" step="1" />
+        <div class="hint">Smaller cloud models, embeddings, tools.</div>
+      </div>
+      <div class="field">
+        <label for="local_pct">Local-GPU share (%)</label>
+        <input type="number" id="local_pct" value="10" min="0" max="100" step="1" />
+        <div class="hint">Self-hosted inference electricity cost.</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="task_count">Approximate monthly task volume</label>
+      <input type="number" id="task_count" value="500000" min="0" step="1000" />
+      <div class="hint">Distinct agent invocations / requests per month.</div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label for="cache_hit_rate">Current cache hit rate (%)</label>
+        <input type="number" id="cache_hit_rate" value="5" min="0" max="100" step="1" />
+      </div>
+      <div class="field">
+        <label for="retry_rate">Failed-retry rate (%)</label>
+        <input type="number" id="retry_rate" value="15" min="0" max="100" step="1" />
+        <div class="hint">Tasks that retried at least once due to failed reasoning.</div>
+      </div>
+    </div>
+
+    <h3>Grid &amp; assumptions</h3>
+
+    <div class="row">
+      <div class="field">
+        <label for="grid_carbon">Grid carbon intensity (g CO2e / kWh)</label>
+        <input type="number" id="grid_carbon" value="367" min="0" step="1" />
+        <div class="hint">US average. EU avg ~250. CA grid ~50. Coal-heavy regions 700+.</div>
+      </div>
+      <div class="field">
+        <label for="frontier_kwh_per_1k">Frontier kWh per 1k tokens</label>
+        <input type="number" id="frontier_kwh_per_1k" value="0.005" min="0" step="0.001" />
+        <div class="hint">Public estimates vary 0.002–0.01.</div>
+      </div>
+    </div>
+
+    <h3>AxiomGraph routing assumptions</h3>
+
+    <div class="savings-mode">
+      <button data-mode="conservative" class="active">Conservative</button>
+      <button data-mode="median">Median</button>
+      <button data-mode="aggressive">Aggressive</button>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label for="cache_lift">Cache hit-rate lift to</label>
+        <input type="number" id="cache_lift" value="25" min="0" max="100" step="1" />
+        <div class="hint">% of tasks served from cached reasoning.</div>
+      </div>
+      <div class="field">
+        <label for="local_lift">Local-GPU share lift to (%)</label>
+        <input type="number" id="local_lift" value="30" min="0" max="100" step="1" />
+        <div class="hint">Easy tasks routed to local models.</div>
+      </div>
+      <div class="field">
+        <label for="retry_cut">Retry rate cut to (%)</label>
+        <input type="number" id="retry_cut" value="6" min="0" max="100" step="1" />
+        <div class="hint">Pruning ineffective reasoning paths.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============================== OUTPUTS ============================== -->
+  <div class="panel" id="outputs">
+    <h3>Projected monthly impact</h3>
+
+    <div class="big">
+      <div class="row1">
+        <div>
+          <div class="num" id="out_savings">$0</div>
+          <div class="small">monthly compute saved</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="num" id="out_savings_pct">0%</div>
+          <div class="small">of current spend</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;">
+        <div class="bar-wrap" aria-label="savings"><div id="bar_savings" class="bar" style="width:0%"></div></div>
+        <div class="legend">
+          <span><span class="swatch" style="background:var(--accent)"></span>recovered compute</span>
+          <span><span class="swatch" style="background:var(--bg);border:1px solid var(--border)"></span>remaining spend</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="metric"><span class="lbl">Annualized savings</span><span class="val" id="out_annual">$0</span></div>
+    <div class="metric"><span class="lbl">Tokens avoided per month</span><span class="val" id="out_tokens">0</span></div>
+    <div class="metric"><span class="lbl">Electricity avoided per month</span><span class="val" id="out_kwh">0 kWh</span></div>
+    <div class="metric"><span class="lbl">CO2e avoided per month</span><span class="val" id="out_co2">0 kg</span></div>
+    <div class="metric"><span class="lbl">CO2e avoided per year</span><span class="val" id="out_co2_yr">0 t</span></div>
+
+    <h3>Equivalent to</h3>
+    <div class="metric"><span class="lbl">Cars off the road for a year</span><span class="val" id="eq_cars">0</span></div>
+    <div class="metric"><span class="lbl">Tree-seedlings sequestering for 10 years</span><span class="val" id="eq_trees">0</span></div>
+    <div class="metric"><span class="lbl">Homes powered for a month</span><span class="val" id="eq_homes">0</span></div>
+
+    <details class="assumptions" style="margin-top:20px;">
+      <summary>How is this calculated?</summary>
+      <ul>
+        <li>Cache lift: each percentage point of cache-hit-rate increase saves ~80% of the per-task cost for those tasks (cache cost is near-zero).</li>
+        <li>Local-GPU shift: each percentage point of frontier-to-local rerouting saves the cost difference between the two tiers (frontier ~50× local).</li>
+        <li>Retry reduction: each percentage point of retry-rate reduction directly reclaims that fraction of compute.</li>
+        <li>Token volume estimated from spend assuming weighted avg $0.012 per 1k tokens for frontier, $0.0015 for mid-tier; local share converted at $0.04/kWh ÷ frontier_kwh_per_1k.</li>
+        <li>CO2e equivalents from EPA Greenhouse Gas Equivalencies Calculator (2024 factors).</li>
+        <li>This is a planning estimate, not an audit. AxiomGraph's developmental ledger is what produces auditable savings reports.</li>
+      </ul>
+    </details>
+  </div>
+</div>
+
+<footer>
+  AxiomGraph NeuroGenesis · MIT License · <a href="https://github.com/VIRIDIS/axiomgraph-neurogenesis">github.com/VIRIDIS/axiomgraph-neurogenesis</a> · Read the launch essay: <a href="../docs/essays/COMPUTE_IS_CARBON.md">Compute is Carbon</a>
+</footer>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  const MODES = {
+    conservative: { cache_lift: 18, local_lift: 22, retry_cut: 9 },
+    median:       { cache_lift: 25, local_lift: 30, retry_cut: 6 },
+    aggressive:   { cache_lift: 38, local_lift: 45, retry_cut: 3 },
+  };
+
+  // EPA Greenhouse Gas Equivalencies (2024 factors).
+  const KG_CO2_PER_CAR_YR  = 4600;     // avg US passenger vehicle.
+  const KG_CO2_PER_TREE_10Y = 60;      // urban tree seedling, 10 years.
+  const KG_CO2_PER_HOME_MO = 700;      // average US home, monthly electricity emissions.
+
+  // Cost assumptions for token-volume back-out.
+  const FRONTIER_PRICE_PER_1K = 0.012;   // weighted avg input+output
+  const MIDTIER_PRICE_PER_1K  = 0.0015;
+  const LOCAL_PRICE_PER_KWH   = 0.04;    // owned-hardware electricity.
+
+  function compute() {
+    const spend      = +$("monthly_spend").value || 0;
+    const front_pct  = (+$("frontier_pct").value || 0) / 100;
+    const mid_pct    = (+$("midtier_pct").value  || 0) / 100;
+    const local_pct  = (+$("local_pct").value    || 0) / 100;
+    const tasks      = +$("task_count").value || 0;
+    const cache      = (+$("cache_hit_rate").value || 0) / 100;
+    const retries    = (+$("retry_rate").value || 0) / 100;
+    const grid_g_per_kwh = +$("grid_carbon").value || 0;
+    const f_kwh_per_1k   = +$("frontier_kwh_per_1k").value || 0;
+
+    const cache_lift = (+$("cache_lift").value || 0) / 100;
+    const local_lift = (+$("local_lift").value || 0) / 100;
+    const retry_cut  = (+$("retry_cut").value || 0) / 100;
+
+    // ---- Savings components --------------------------------------------------
+    // 1. Cache lift: each new cache hit saves ~80% of the avg per-task cost.
+    const cache_delta = Math.max(0, cache_lift - cache);
+    const cache_savings = spend * cache_delta * 0.80;
+
+    // 2. Local-GPU shift: each pp shifted from frontier to local saves the price delta.
+    //    Frontier-share that becomes local.
+    const front_to_local_delta = Math.max(0, local_lift - local_pct);
+    //    Approx: frontier dollars converted, retain 1/50th of cost on local hardware.
+    const front_to_local_savings = (spend * front_pct) * (front_to_local_delta / Math.max(0.01, front_pct)) * (49/50);
+
+    // 3. Retry reduction: each pp of retry rate cut reclaims that fraction of compute.
+    const retry_delta = Math.max(0, retries - retry_cut);
+    const retry_savings = spend * retry_delta;
+
+    // Combine (avoid double-counting via cap at 75% of spend).
+    let total_savings = cache_savings + front_to_local_savings + retry_savings;
+    total_savings = Math.min(total_savings, spend * 0.75);
+
+    const savings_pct = spend > 0 ? (total_savings / spend) * 100 : 0;
+
+    // ---- Token volume saved --------------------------------------------------
+    // Estimate avg token cost: weighted across frontier+midtier dollars.
+    const dollars_per_1k_tokens = (front_pct * FRONTIER_PRICE_PER_1K + mid_pct * MIDTIER_PRICE_PER_1K) || FRONTIER_PRICE_PER_1K;
+    const tokens_saved = total_savings > 0 ? (total_savings / dollars_per_1k_tokens) * 1000 : 0;
+
+    // ---- Electricity & CO2 ---------------------------------------------------
+    // Frontier API electricity per dollar:
+    //   kWh per task = kwh_per_1k * tokens_saved / 1000  (already in tokens_saved)
+    const kwh_saved = (tokens_saved / 1000) * f_kwh_per_1k
+                    + (total_savings * local_pct / LOCAL_PRICE_PER_KWH);  // local share converts $/kWh directly
+    const kg_co2_per_month = (kwh_saved * grid_g_per_kwh) / 1000;
+    const kg_co2_per_year  = kg_co2_per_month * 12;
+    const t_co2_per_year   = kg_co2_per_year / 1000;
+
+    // ---- Equivalencies -------------------------------------------------------
+    const cars   = kg_co2_per_year / KG_CO2_PER_CAR_YR;
+    const trees  = kg_co2_per_year / KG_CO2_PER_TREE_10Y;
+    const homes  = kg_co2_per_month / KG_CO2_PER_HOME_MO;
+
+    // ---- Render --------------------------------------------------------------
+    const fmtUSD = (n) => n.toLocaleString(undefined, {style:"currency", currency:"USD", maximumFractionDigits: 0});
+    const fmt    = (n, d=0) => Number(n).toLocaleString(undefined, {maximumFractionDigits: d});
+
+    $("out_savings").textContent     = fmtUSD(total_savings);
+    $("out_savings_pct").textContent = fmt(savings_pct, 1) + "%";
+    $("out_annual").textContent      = fmtUSD(total_savings * 12);
+    $("out_tokens").textContent      = fmt(tokens_saved);
+    $("out_kwh").textContent         = fmt(kwh_saved, 0) + " kWh";
+    $("out_co2").textContent         = fmt(kg_co2_per_month, 0) + " kg";
+    $("out_co2_yr").textContent      = (t_co2_per_year >= 1)
+                                          ? fmt(t_co2_per_year, 1) + " t"
+                                          : fmt(kg_co2_per_year, 0) + " kg";
+
+    $("eq_cars").textContent   = fmt(cars, 1);
+    $("eq_trees").textContent  = fmt(trees, 0);
+    $("eq_homes").textContent  = fmt(homes, 1);
+
+    $("bar_savings").style.width = Math.min(100, savings_pct) + "%";
+  }
+
+  // Wire inputs.
+  document.querySelectorAll("#inputs input, #inputs select").forEach((el) => {
+    el.addEventListener("input", compute);
+  });
+
+  // Wire savings-mode buttons.
+  document.querySelectorAll(".savings-mode button").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".savings-mode button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      const m = MODES[btn.dataset.mode];
+      $("cache_lift").value = m.cache_lift;
+      $("local_lift").value = m.local_lift;
+      $("retry_cut").value  = m.retry_cut;
+      compute();
+    });
+  });
+
+  // Initial render.
+  compute();
+</script>
+
+</body>
+</html>
