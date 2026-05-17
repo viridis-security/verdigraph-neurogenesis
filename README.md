@@ -1,6 +1,6 @@
 # Verdigraph NeuroGenesis
 
-![tests](https://github.com/OWNER/REPO/actions/workflows/tests.yml/badge.svg)
+![tests](https://github.com/OWNER/REPO/actions/workflows/tests.yml/badge.svg) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20261687.svg)](https://doi.org/10.5281/zenodo.20261687)
 
 A software-first framework for AI-agent-architected, self-evolving cognitive substrates.
 
@@ -91,6 +91,15 @@ verdigraph-mcp
 ```
 
 See [docs/MCP_SERVER.md](docs/MCP_SERVER.md) for the full tool list and a `claude_desktop_config.json` snippet.
+
+## Cite this work
+
+This release is permanently archived on Zenodo with a citable DOI.
+
+> Hart, Justin. (2026). *Verdigraph NeuroGenesis: A Software Framework for Self-Evolving AI-Agent Cognitive Substrates* (Version 0.1.0). Zenodo. https://doi.org/10.5281/zenodo.20261687
+
+- **Version 0.1.0 DOI:** [10.5281/zenodo.20261687](https://doi.org/10.5281/zenodo.20261687)
+- **Concept DOI (all versions):** [10.5281/zenodo.20261686](https://doi.org/10.5281/zenodo.20261686)
 
 ## Contributing
 

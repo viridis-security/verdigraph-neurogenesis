@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [0.1.0] — 2026-05-17
 
+**Permanent archive (Zenodo):**
+- Version DOI: [10.5281/zenodo.20261687](https://doi.org/10.5281/zenodo.20261687)
+- Concept DOI (all versions): [10.5281/zenodo.20261686](https://doi.org/10.5281/zenodo.20261686)
+- Record URL: https://zenodo.org/records/20261687
+
+
 Initial public release. Phase 1 MVP per [docs/ROADMAP.md](docs/ROADMAP.md)
 plus the Phase 2 MCP runtime layer.
 
