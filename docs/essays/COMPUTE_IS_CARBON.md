@@ -242,7 +242,7 @@ it. We would like your help.
 
 ---
 
-*The code is at [github.com/viridis-llc/verdigraph-neurogenesis](https://github.com/viridis-llc/verdigraph-neurogenesis). The papers are in the
+*The code is at [github.com/viridis-security/verdigraph-neurogenesis](https://github.com/viridis-security/verdigraph-neurogenesis). The papers are in the
 [`papers/`](../../papers/) directory of the repository. The MCP server is in
 [`verdigraph_mcp/`](../../verdigraph_mcp/). If any of this resonates, get
 in touch.*

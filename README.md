@@ -1,6 +1,6 @@
 # Verdigraph NeuroGenesis
 
-![tests](https://github.com/viridis-llc/verdigraph-neurogenesis/actions/workflows/tests.yml/badge.svg) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20261687.svg)](https://doi.org/10.5281/zenodo.20261687)
+![tests](https://github.com/viridis-security/verdigraph-neurogenesis/actions/workflows/tests.yml/badge.svg) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20261687.svg)](https://doi.org/10.5281/zenodo.20261687)
 
 A software-first framework for AI-agent-architected, self-evolving cognitive substrates.
 

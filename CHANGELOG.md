@@ -53,5 +53,5 @@ plus the Phase 2 MCP runtime layer.
   `safety_axioms`. `DevelopmentalAgent.from_state_dict()` and `load_state()`
   reconstruct evolved agents from persisted state.
 
-[Unreleased]: https://github.com/viridis-llc/verdigraph-neurogenesis/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/viridis-llc/verdigraph-neurogenesis/releases/tag/v0.1.0
+[Unreleased]: https://github.com/viridis-security/verdigraph-neurogenesis/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/viridis-security/verdigraph-neurogenesis/releases/tag/v0.1.0
