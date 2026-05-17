@@ -3,12 +3,12 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "axiomgraph-neurogenesis"
+name = "verdigraph-neurogenesis"
 version = "0.1.0"
 description = "A software framework for self-evolving AI-agent cognitive graphs."
 readme = "README.md"
 requires-python = ">=3.10"
-authors = [{ name = "AxiomGraph Contributors" }]
+authors = [{ name = "Verdigraph Contributors" }]
 license = { text = "MIT" }
 dependencies = []
 
@@ -17,11 +17,11 @@ dev = ["pytest>=8.0"]
 mcp = ["mcp[cli]>=1.0", "pydantic>=2.0"]
 
 [project.scripts]
-axiomgraph-mcp = "axiomgraph_mcp.server:main"
+verdigraph-mcp = "verdigraph_mcp.server:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["axiomgraph*"]
+include = ["verdigraph*"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]

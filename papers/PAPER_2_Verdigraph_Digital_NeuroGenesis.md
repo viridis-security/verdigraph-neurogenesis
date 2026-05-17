@@ -1,10 +1,10 @@
-# AxiomGraph: A Software Framework for AI-Agent-Architected, Self-Evolving Cognitive Substrates
+# Verdigraph: A Software Framework for AI-Agent-Architected, Self-Evolving Cognitive Substrates
 
 ## Abstract
 
-This paper introduces AxiomGraph, a software framework for creating AI agents that can architect, monitor, modify, and evolve their own cognitive structures through a dynamic graph of nodes and synapses. The framework is inspired by biological development, neuromorphic computing, memristive systems, physical reservoir computing, and the companion concept of solution-grown agent-specific neuromorphic substrates. However, AxiomGraph removes the immediate need for physical fabrication by implementing the same developmental principles in a purely digital environment.
+This paper introduces Verdigraph, a software framework for creating AI agents that can architect, monitor, modify, and evolve their own cognitive structures through a dynamic graph of nodes and synapses. The framework is inspired by biological development, neuromorphic computing, memristive systems, physical reservoir computing, and the companion concept of solution-grown agent-specific neuromorphic substrates. However, Verdigraph removes the immediate need for physical fabrication by implementing the same developmental principles in a purely digital environment.
 
-In AxiomGraph, each AI agent begins with a digital genome: a structured specification defining its purpose, cognitive modules, memory systems, tool interfaces, growth constraints, pruning rules, safety boundaries, and performance metrics. The agent's cognition is represented as a living graph. Nodes represent reasoning modules, memory systems, skills, tools, subagents, evaluators, simulators, or domain-specific processors. Edges represent synaptic pathways with dynamic properties such as routing strength, trust, cost, latency, success rate, decay, plasticity, and specialization.
+In Verdigraph, each AI agent begins with a digital genome: a structured specification defining its purpose, cognitive modules, memory systems, tool interfaces, growth constraints, pruning rules, safety boundaries, and performance metrics. The agent's cognition is represented as a living graph. Nodes represent reasoning modules, memory systems, skills, tools, subagents, evaluators, simulators, or domain-specific processors. Edges represent synaptic pathways with dynamic properties such as routing strength, trust, cost, latency, success rate, decay, plasticity, and specialization.
 
 The central claim of this paper is that AI agents should not remain static prompt-driven systems. They should become developmental cognitive systems capable of growing new capabilities, strengthening successful reasoning pathways, pruning ineffective ones, and generating individualized internal architectures over time. This creates a bridge between software agents, neuromorphic principles, adaptive memory, and future physical embodiments such as 3D-printed solution-grown neuromorphic substrates.
 
@@ -14,13 +14,13 @@ Current AI agents are typically assembled from a static combination of model pro
 
 Biological intelligence is different. Human brains are not simply loaded with fixed programs. They develop through growth, reinforcement, pruning, specialization, and experience. The structure of the brain reflects both genetic constraints and lived interaction.
 
-AxiomGraph applies this developmental principle to software agents.
+Verdigraph applies this developmental principle to software agents.
 
 Instead of asking: How do we prompt an AI agent better?
 
-AxiomGraph asks: How does an AI agent grow a better cognitive architecture over time?
+Verdigraph asks: How does an AI agent grow a better cognitive architecture over time?
 
-This distinction is critical. Prompt engineering changes the instruction layer. Fine-tuning changes model weights. Retrieval systems add external memory. AxiomGraph changes the agent's cognitive topology.
+This distinction is critical. Prompt engineering changes the instruction layer. Fine-tuning changes model weights. Retrieval systems add external memory. Verdigraph changes the agent's cognitive topology.
 
 ## 2. Core Thesis
 
@@ -39,13 +39,13 @@ This framework allows an agent to:
 7. Preserve an auditable developmental history.
 8. Generate future physical neuromorphic substrate designs.
 
-The framework is called AxiomGraph because the agent's growth is governed by explicit axioms: non-negotiable rules that constrain safe, useful, measurable development.
+The framework is called Verdigraph because the agent's growth is governed by explicit axioms: non-negotiable rules that constrain safe, useful, measurable development.
 
 ## 3. Relationship to Physical NeuroGenesis
 
-The companion physical concept proposes that an AI agent designs its own brain architecture, a system 3D prints a scaffold, and solution chemistry grows synapse-like conductive pathways inside that scaffold. AxiomGraph translates this into software.
+The companion physical concept proposes that an AI agent designs its own brain architecture, a system 3D prints a scaffold, and solution chemistry grows synapse-like conductive pathways inside that scaffold. Verdigraph translates this into software.
 
-| Physical NeuroGenesis | AxiomGraph Software Equivalent |
+| Physical NeuroGenesis | Verdigraph Software Equivalent |
 |---|---|
 | 3D-printed scaffold | Cognitive graph scaffold |
 | Physical nodes | Software modules, tools, memories, subagents |
@@ -94,9 +94,9 @@ The process by which the agent weakens, disables, deletes, or bypasses ineffecti
 
 A persistent log of architectural changes, task outcomes, growth events, pruning events, and performance changes.
 
-## 5. The AxiomGraph Architecture
+## 5. The Verdigraph Architecture
 
-AxiomGraph consists of ten primary components:
+Verdigraph consists of ten primary components:
 
 1. Digital Genome
 2. Cognitive Graph
@@ -168,11 +168,11 @@ User Input
    -> Final Response
 ```
 
-Unlike static workflows, AxiomGraph continuously updates this structure. If the agent repeatedly succeeds by routing from a domain module to a documentation module, that edge strengthens. If a tool produces poor outcomes, its trust score declines. If the agent repeatedly encounters a new task class, it may grow a specialized module.
+Unlike static workflows, Verdigraph continuously updates this structure. If the agent repeatedly succeeds by routing from a domain module to a documentation module, that edge strengthens. If a tool produces poor outcomes, its trust score declines. If the agent repeatedly encounters a new task class, it may grow a specialized module.
 
 ## 8. Digital Synapses
 
-In AxiomGraph, an edge is not merely a connection. It is a living synapse.
+In Verdigraph, an edge is not merely a connection. It is a living synapse.
 
 Each synapse may include:
 
@@ -245,7 +245,7 @@ Growth gives the agent creativity. Pruning gives the agent discipline.
 
 ## 11. Evaluation Engine
 
-AxiomGraph requires measurable feedback. The Evaluation Engine scores outcomes across multiple dimensions:
+Verdigraph requires measurable feedback. The Evaluation Engine scores outcomes across multiple dimensions:
 
 | Metric | Description |
 |---|---|
@@ -262,7 +262,7 @@ The Evaluation Engine is the selective pressure of the system. No growth should 
 
 ## 12. Self-Reflection Interface
 
-A defining feature of AxiomGraph is that the agent can inspect and discuss its own architecture. The agent can answer questions like:
+A defining feature of Verdigraph is that the agent can inspect and discuss its own architecture. The agent can answer questions like:
 
 - Which modules do I rely on most?
 - Which pathways are underperforming?
@@ -297,7 +297,7 @@ This ledger creates auditability, debugging capacity, and investor-grade evidenc
 
 ## 14. Safety Boundary Layer
 
-A self-evolving agent must remain bounded. AxiomGraph must include explicit safety axioms.
+A self-evolving agent must remain bounded. Verdigraph must include explicit safety axioms.
 
 Examples:
 
@@ -425,7 +425,7 @@ The agent chooses pathways with high expected value and acceptable risk.
 
 ## 19. Invariants
 
-AxiomGraph must obey the following invariants:
+Verdigraph must obey the following invariants:
 
 1. Every cognitive structure must be inspectable.
 2. Every growth event must be logged.
@@ -440,9 +440,9 @@ AxiomGraph must obey the following invariants:
 
 ## 20. Business Model
 
-AxiomGraph can become a software company before the physical hardware exists.
+Verdigraph can become a software company before the physical hardware exists.
 
-### 20.1 Product 1: AxiomGraph Agent OS
+### 20.1 Product 1: Verdigraph Agent OS
 
 A platform for building self-evolving AI agents. Customers include startups, researchers, enterprises, consultants, automation builders, and AI-agent developers.
 
@@ -460,13 +460,13 @@ The eventual physical embodiment: 3D-printed scaffold, solution-grown synapses, 
 
 ## 21. Strategic Roadmap
 
-### Phase 1: Digital AxiomGraph MVP
+### Phase 1: Digital Verdigraph MVP
 
 Build the graph schema, node/edge tracking, simple growth rules, pruning rules, evaluation engine, dashboard, and one working hypothetical agent.
 
 ### Phase 2: Multi-Agent Ecosystem
 
-Apply AxiomGraph to multiple hypothetical agents to prove that one architecture can support many specialized evolving agents.
+Apply Verdigraph to multiple hypothetical agents to prove that one architecture can support many specialized evolving agents.
 
 ### Phase 3: Simulation Layer
 
@@ -478,7 +478,7 @@ Begin small physical experiments: 8-node scaffold, solution-grown pathways, cond
 
 ### Phase 5: Hybrid NeuroGenesis Platform
 
-Connect AxiomGraph software brains with SynapseForge physical substrates through a shared developmental loop.
+Connect Verdigraph software brains with SynapseForge physical substrates through a shared developmental loop.
 
 ## 22. Patentable Concept Statement
 
@@ -490,7 +490,7 @@ Secondary claims include digital genomes for AI-agent cognitive development, dyn
 
 ## 23. Conclusion
 
-AxiomGraph proposes a software-first path toward developmental artificial intelligence. Instead of treating AI agents as static prompt-and-tool systems, AxiomGraph treats them as evolving cognitive systems whose internal architectures can grow, specialize, prune, and adapt over time.
+Verdigraph proposes a software-first path toward developmental artificial intelligence. Instead of treating AI agents as static prompt-and-tool systems, Verdigraph treats them as evolving cognitive systems whose internal architectures can grow, specialize, prune, and adapt over time.
 
 This framework preserves the deepest insight from physical NeuroGenesis: intelligence can be architected as a developmental substrate. In the physical version, the substrate is a 3D-printed scaffold with solution-grown synapses. In the digital version, the substrate is a self-evolving graph of nodes, edges, memories, tools, and evaluators.
 
@@ -500,4 +500,4 @@ The final thesis is:
 
 The next generation of AI agents will not simply be prompted, fine-tuned, or connected to tools. They will grow individualized cognitive architectures through experience.
 
-AxiomGraph is the software operating system for that future.
+Verdigraph is the software operating system for that future.

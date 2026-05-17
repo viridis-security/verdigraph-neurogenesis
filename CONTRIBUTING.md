@@ -1,4 +1,4 @@
-# Contributing to AxiomGraph NeuroGenesis
+# Contributing to Verdigraph NeuroGenesis
 
 Thanks for your interest. This repo is an experimental research framework, but
 contributions that preserve its invariants and extend its reach are welcome.

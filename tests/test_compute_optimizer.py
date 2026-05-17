@@ -1,4 +1,4 @@
-from axiomgraph.compute import ComputeOptimizer, ComputeProfile, TaskProfile, EfficiencyReport
+from verdigraph.compute import ComputeOptimizer, ComputeProfile, TaskProfile, EfficiencyReport
 
 
 def test_choose_profile_prefers_cheap_sufficient_local_model_for_easy_task():

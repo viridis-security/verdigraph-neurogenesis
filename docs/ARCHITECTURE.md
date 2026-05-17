@@ -32,13 +32,13 @@ Evolved state JSON
 
 ## Training/evolution loop
 
-AxiomGraph does not train a foundation model. It trains an agent architecture around a model or set of models. The model can remain fixed while the graph evolves routing, tool selection, memory organization, and specialization.
+Verdigraph does not train a foundation model. It trains an agent architecture around a model or set of models. The model can remain fixed while the graph evolves routing, tool selection, memory organization, and specialization.
 
 ## Safety model
 
-AxiomGraph allows bounded structural development. It does not allow unrestricted self-modification. Protected nodes, logging requirements, and growth limits are enforced by the non-plastic infrastructure layer.
+Verdigraph allows bounded structural development. It does not allow unrestricted self-modification. Protected nodes, logging requirements, and growth limits are enforced by the non-plastic infrastructure layer.
 
 
 ## Compute Efficiency Layer
 
-The `axiomgraph.compute` module adds compute-aware routing. It profiles tasks and execution resources, then chooses the cheapest reliable path across cache reuse, local GPU models, cloud transformer APIs, tools, and evaluators. This supports the invariant: maximize successful task completion per unit compute.
+The `verdigraph.compute` module adds compute-aware routing. It profiles tasks and execution resources, then chooses the cheapest reliable path across cache reuse, local GPU models, cloud transformer APIs, tools, and evaluators. This supports the invariant: maximize successful task completion per unit compute.

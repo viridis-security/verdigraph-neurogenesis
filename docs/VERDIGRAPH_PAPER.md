@@ -1,8 +1,8 @@
-# AxiomGraph: A Software Framework for AI-Agent-Architected, Self-Evolving Cognitive Substrates
+# Verdigraph: A Software Framework for AI-Agent-Architected, Self-Evolving Cognitive Substrates
 
 ## Abstract
 
-AxiomGraph is a software framework for building AI agents that can architect, monitor, modify, and evolve their own cognitive structures through a dynamic graph of nodes and synapses. Each agent begins with a digital genome defining purpose, initial modules, growth rules, pruning rules, evaluation metrics, and safety axioms. The agent's cognition is represented as an inspectable graph where nodes represent skills, tools, memories, evaluators, planners, or domain modules, and edges represent dynamic synaptic pathways with properties such as weight, trust, cost, latency, plasticity, success rate, and decay. AxiomGraph implements a developmental loop in which task outcomes strengthen successful routes, weaken poor routes, create specialized nodes for repeated task types, prune low-value pathways, and log all changes in a developmental ledger.
+Verdigraph is a software framework for building AI agents that can architect, monitor, modify, and evolve their own cognitive structures through a dynamic graph of nodes and synapses. Each agent begins with a digital genome defining purpose, initial modules, growth rules, pruning rules, evaluation metrics, and safety axioms. The agent's cognition is represented as an inspectable graph where nodes represent skills, tools, memories, evaluators, planners, or domain modules, and edges represent dynamic synaptic pathways with properties such as weight, trust, cost, latency, plasticity, success rate, and decay. Verdigraph implements a developmental loop in which task outcomes strengthen successful routes, weaken poor routes, create specialized nodes for repeated task types, prune low-value pathways, and log all changes in a developmental ledger.
 
 ## 1. Thesis
 
@@ -10,7 +10,7 @@ AI agents should not remain static prompt-and-tool systems. They should become d
 
 ## 2. Digital-to-Physical Bridge
 
-AxiomGraph is the digital substrate for a later physical embodiment. In a future hardware version, cognitive nodes could map to printed electrodes, and digital synapses could map to solution-grown conductance pathways. The software platform can therefore validate agent-guided brain evolution before physical neuromorphic scaffolds are built.
+Verdigraph is the digital substrate for a later physical embodiment. In a future hardware version, cognitive nodes could map to printed electrodes, and digital synapses could map to solution-grown conductance pathways. The software platform can therefore validate agent-guided brain evolution before physical neuromorphic scaffolds are built.
 
 ## 3. Core Components
 

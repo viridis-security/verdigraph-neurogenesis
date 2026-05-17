@@ -1,4 +1,4 @@
-"""Demonstrate AxiomGraph's compute-efficiency routing layer.
+"""Demonstrate Verdigraph's compute-efficiency routing layer.
 
 Run from repo root:
     python examples/compute_efficiency_demo.py
@@ -10,7 +10,7 @@ import sys
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT.parent))
 
-from axiomgraph.compute import ComputeOptimizer, ComputeProfile, TaskProfile
+from verdigraph.compute import ComputeOptimizer, ComputeProfile, TaskProfile
 
 
 def main() -> None:

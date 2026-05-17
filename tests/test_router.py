@@ -1,5 +1,5 @@
-from axiomgraph.graph import CognitiveEdge, CognitiveGraph, CognitiveNode
-from axiomgraph.routing import Router, RouteStep
+from verdigraph.graph import CognitiveEdge, CognitiveGraph, CognitiveNode
+from verdigraph.routing import Router, RouteStep
 
 
 def _seeded_graph() -> CognitiveGraph:

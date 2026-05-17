@@ -1,6 +1,6 @@
-# AxiomGraph MCP Server
+# Verdigraph MCP Server
 
-`axiomgraph_mcp` exposes the AxiomGraph framework as a stdio Model Context
+`verdigraph_mcp` exposes the Verdigraph framework as a stdio Model Context
 Protocol (MCP) server. Any MCP-compatible client — Claude Desktop, Cowork,
 Claude Code, custom agents — can use it to create developmental agents,
 submit task evaluations, inspect cognitive graphs, route compute, and persist
@@ -13,13 +13,13 @@ pip install -e ".[mcp]"
 ```
 
 This adds the `mcp[cli]` and `pydantic` dependencies and registers an
-`axiomgraph-mcp` console script.
+`verdigraph-mcp` console script.
 
 ## Run
 
 ```bash
-axiomgraph-mcp                                    # stdio on PWD/axiomgraph_state/
-AXIOMGRAPH_STATE_DIR=~/.axiomgraph axiomgraph-mcp # custom persistence dir
+verdigraph-mcp                                    # stdio on PWD/verdigraph_state/
+VERDIGRAPH_STATE_DIR=~/.verdigraph verdigraph-mcp # custom persistence dir
 ```
 
 ## Claude Desktop / Cowork config
@@ -30,45 +30,45 @@ config for Cowork:
 ```json
 {
   "mcpServers": {
-    "axiomgraph": {
-      "command": "axiomgraph-mcp",
+    "verdigraph": {
+      "command": "verdigraph-mcp",
       "env": {
-        "AXIOMGRAPH_STATE_DIR": "/Users/YOU/.axiomgraph"
+        "VERDIGRAPH_STATE_DIR": "/Users/YOU/.verdigraph"
       }
     }
   }
 }
 ```
 
-If `axiomgraph-mcp` isn't on PATH, use the absolute path produced by
-`which axiomgraph-mcp` after `pip install`.
+If `verdigraph-mcp` isn't on PATH, use the absolute path produced by
+`which verdigraph-mcp` after `pip install`.
 
 ## Tools
 
-All tools use the `axiomgraph_` prefix to avoid collisions with other MCP
+All tools use the `verdigraph_` prefix to avoid collisions with other MCP
 servers.
 
 | Tool | Purpose |
 |---|---|
-| `axiomgraph_create_agent` | Instantiate a `DevelopmentalAgent` from a genome dict; return its `agent_id`. |
-| `axiomgraph_list_agents` | List every registered agent with a compact summary. |
-| `axiomgraph_get_graph_summary` | Compact node/edge view of one agent. |
-| `axiomgraph_get_agent_state` | Full state dict (genome + graph + ledger). |
-| `axiomgraph_submit_evaluation` | Apply a task evaluation; triggers growth/pruning/reinforcement. Returns updated summary + new ledger events. |
-| `axiomgraph_best_next_steps` | Top-k outgoing routes from a node, ranked by edge score. |
-| `axiomgraph_get_ledger` | Recent developmental ledger events. |
-| `axiomgraph_save_agent_state` | Persist agent to `<state_dir>/<agent_id>.json`. |
-| `axiomgraph_load_agent_state` | Load an agent state file into the registry. |
-| `axiomgraph_delete_agent` | Remove agent from registry; optionally delete its file. |
-| `axiomgraph_choose_compute_profile` | Pick cheapest reliable compute profile; hard-enforces `min_quality`. |
-| `axiomgraph_should_use_cache` | Cache policy decision. |
-| `axiomgraph_should_escalate` | Escalation policy decision. |
+| `verdigraph_create_agent` | Instantiate a `DevelopmentalAgent` from a genome dict; return its `agent_id`. |
+| `verdigraph_list_agents` | List every registered agent with a compact summary. |
+| `verdigraph_get_graph_summary` | Compact node/edge view of one agent. |
+| `verdigraph_get_agent_state` | Full state dict (genome + graph + ledger). |
+| `verdigraph_submit_evaluation` | Apply a task evaluation; triggers growth/pruning/reinforcement. Returns updated summary + new ledger events. |
+| `verdigraph_best_next_steps` | Top-k outgoing routes from a node, ranked by edge score. |
+| `verdigraph_get_ledger` | Recent developmental ledger events. |
+| `verdigraph_save_agent_state` | Persist agent to `<state_dir>/<agent_id>.json`. |
+| `verdigraph_load_agent_state` | Load an agent state file into the registry. |
+| `verdigraph_delete_agent` | Remove agent from registry; optionally delete its file. |
+| `verdigraph_choose_compute_profile` | Pick cheapest reliable compute profile; hard-enforces `min_quality`. |
+| `verdigraph_should_use_cache` | Cache policy decision. |
+| `verdigraph_should_escalate` | Escalation policy decision. |
 
 ## Safety invariants
 
 - Every graph mutation goes through `DevelopmentalAgent.process_evaluation` —
   the MCP layer never bypasses growth rules, pruning rules, or safety axioms.
-- `axiomgraph_choose_compute_profile` enforces `min_quality` as a hard
+- `verdigraph_choose_compute_profile` enforces `min_quality` as a hard
   contract (see `docs/INVARIANTS.md`).
 - Persistence files are written only to the configured `state_dir`.
 - Agent state files are full round-trips: genome (including `growth_rules`
@@ -78,7 +78,7 @@ servers.
 
 ```jsonc
 // 1. Create an agent
-axiomgraph_create_agent({
+verdigraph_create_agent({
   "genome": {
     "agent_name": "Research Assistant",
     "purpose": "Route research tasks through planning, search, synthesis.",
@@ -89,7 +89,7 @@ axiomgraph_create_agent({
 // -> {"agent_id": "research-assistant", ...}
 
 // 2. Submit a successful evaluation
-axiomgraph_submit_evaluation({
+verdigraph_submit_evaluation({
   "agent_id": "research-assistant",
   "task_id": "t1",
   "task_type": "literature_review",
@@ -99,8 +99,8 @@ axiomgraph_submit_evaluation({
 })
 
 // 3. Check evolved routes
-axiomgraph_best_next_steps({"agent_id": "research-assistant", "from_node": "planner", "limit": 3})
+verdigraph_best_next_steps({"agent_id": "research-assistant", "from_node": "planner", "limit": 3})
 
 // 4. Persist
-axiomgraph_save_agent_state({"agent_id": "research-assistant"})
+verdigraph_save_agent_state({"agent_id": "research-assistant"})
 ```

@@ -1,14 +1,14 @@
-# AxiomGraph NeuroGenesis
+# Verdigraph NeuroGenesis
 
 ![tests](https://github.com/OWNER/REPO/actions/workflows/tests.yml/badge.svg)
 
 A software-first framework for AI-agent-architected, self-evolving cognitive substrates.
 
-AxiomGraph models an AI agent as a living graph of cognitive nodes and weighted synaptic edges. The graph can grow new modules, strengthen useful pathways, prune weak pathways, log all developmental changes, preserve safety invariants, and optimize compute by learning the cheapest reliable cognitive route for each task. This repository is a GitHub-ready starter kit for experimenting with the concept in a purely digital environment before any physical neuromorphic hardware is attempted.
+Verdigraph models an AI agent as a living graph of cognitive nodes and weighted synaptic edges. The graph can grow new modules, strengthen useful pathways, prune weak pathways, log all developmental changes, preserve safety invariants, and optimize compute by learning the cheapest reliable cognitive route for each task. This repository is a GitHub-ready starter kit for experimenting with the concept in a purely digital environment before any physical neuromorphic hardware is attempted.
 
 ## Core idea
 
-Instead of treating an AI agent as a static prompt + tool list, AxiomGraph treats it as a developmental system:
+Instead of treating an AI agent as a static prompt + tool list, Verdigraph treats it as a developmental system:
 
 ```text
 agent genome -> cognitive graph -> task routing -> evaluation -> growth/pruning -> evolved graph
@@ -16,7 +16,7 @@ agent genome -> cognitive graph -> task routing -> evaluation -> growth/pruning 
 
 The same abstract structure can later map to physical neuromorphic hardware:
 
-| Digital AxiomGraph | Future physical embodiment |
+| Digital Verdigraph | Future physical embodiment |
 |---|---|
 | Cognitive nodes | Printed nodes/electrodes |
 | Weighted edges | Grown synapses/conductance paths |
@@ -28,7 +28,7 @@ The same abstract structure can later map to physical neuromorphic hardware:
 ## Repository contents
 
 ```text
-axiomgraph/              Core framework
+verdigraph/              Core framework
 examples/                Hypothetical agent genomes and demo scripts
 docs/                    Concept paper, architecture, invariants, compute-efficiency layer
 scripts/                 CLI helper scripts
@@ -83,11 +83,11 @@ pytest
 
 ## Run as an MCP server
 
-AxiomGraph ships with a stdio Model Context Protocol server so Claude Desktop, Cowork, Claude Code, and other MCP-compatible clients can drive it directly.
+Verdigraph ships with a stdio Model Context Protocol server so Claude Desktop, Cowork, Claude Code, and other MCP-compatible clients can drive it directly.
 
 ```bash
 pip install -e ".[mcp]"
-axiomgraph-mcp
+verdigraph-mcp
 ```
 
 See [docs/MCP_SERVER.md](docs/MCP_SERVER.md) for the full tool list and a `claude_desktop_config.json` snippet.
@@ -105,6 +105,6 @@ This is an experimental research framework. It does not create autonomous unrest
 This repository includes two companion papers in the `papers/` folder:
 
 1. `PAPER_1_Physical_NeuroGenesis_SynapseForge.md/.pdf` - the physical version: AI-agent-architected, 3D-printed, solution-grown neuromorphic substrates.
-2. `PAPER_2_AxiomGraph_Digital_NeuroGenesis.md/.pdf` - the software version: self-evolving digital cognitive graphs for AI agents.
-3. `PAPER_3_AxiomGraph_Compute_Efficiency.md/.pdf` - the compute-efficiency layer: cheapest reliable cognitive routing for local GPU, cloud transformer, and hybrid agents.
+2. `PAPER_2_Verdigraph_Digital_NeuroGenesis.md/.pdf` - the software version: self-evolving digital cognitive graphs for AI agents.
+3. `PAPER_3_Verdigraph_Compute_Efficiency.md/.pdf` - the compute-efficiency layer: cheapest reliable cognitive routing for local GPU, cloud transformer, and hybrid agents.
 

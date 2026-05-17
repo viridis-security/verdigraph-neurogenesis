@@ -1,6 +1,6 @@
 # Vision
 
-AxiomGraph NeuroGenesis is built on a simple observation: **AI agents waste
+Verdigraph NeuroGenesis is built on a simple observation: **AI agents waste
 energy at industrial scale, and energy is carbon.**
 
 Most agent frameworks today treat the agent as a static assembly of prompts
@@ -21,7 +21,7 @@ that no longer earns its compute cost. The architecture should be inspectable,
 the development should be auditable, and the optimization target should be
 explicit: **maximize successful task completion per unit compute.**
 
-That is what AxiomGraph implements. The agent is a graph of cognitive nodes
+That is what Verdigraph implements. The agent is a graph of cognitive nodes
 and weighted synaptic edges. A digital genome bounds growth. An append-only
 ledger records every change. A safety axiom layer prevents the parts that
 must not move from moving. A compute-efficiency layer learns the cheapest
@@ -30,7 +30,7 @@ and evaluators.
 
 ## Why Viridis
 
-Viridis LLC is a conservation technology company. AxiomGraph is one of three
+Viridis LLC is a conservation technology company. Verdigraph is one of three
 interconnected projects we're building:
 
 - **HDFM** — high-density forest management agents
@@ -48,7 +48,7 @@ share of conservation work.
 
 ## What we want
 
-- **Researchers** to use AxiomGraph as a substrate for studying agent
+- **Researchers** to use Verdigraph as a substrate for studying agent
   development, specialization, and compute-efficient routing.
 - **Engineers** to drop the MCP server into existing agent stacks and start
   measuring savings.

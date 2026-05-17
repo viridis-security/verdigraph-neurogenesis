@@ -1,4 +1,4 @@
-"""End-to-end tests for the AxiomGraph MCP layer.
+"""End-to-end tests for the Verdigraph MCP layer.
 
 These call the tool handlers directly (via the FastMCP registry) so we
 exercise the same code path Claude/Cowork would, without spinning up a
@@ -20,7 +20,7 @@ pytest.importorskip("mcp")
 
 def _call(tool_name: str, **kwargs):
     """Invoke a FastMCP-registered tool handler synchronously."""
-    from axiomgraph_mcp import server  # local import so AXIOMGRAPH_STATE_DIR takes effect
+    from verdigraph_mcp import server  # local import so VERDIGRAPH_STATE_DIR takes effect
 
     # FastMCP wraps decorated functions; the underlying coroutine is the
     # module-level function with the same name.
@@ -44,10 +44,10 @@ def _call(tool_name: str, **kwargs):
 @pytest.fixture(autouse=True)
 def isolated_state_dir(tmp_path, monkeypatch):
     """Give each test its own registry directory and reset the registry singleton."""
-    monkeypatch.setenv("AXIOMGRAPH_STATE_DIR", str(tmp_path))
+    monkeypatch.setenv("VERDIGRAPH_STATE_DIR", str(tmp_path))
     # Force a fresh registry per test by reloading the module.
     import importlib
-    import axiomgraph_mcp.server as srv
+    import verdigraph_mcp.server as srv
     importlib.reload(srv)
     yield
 
@@ -62,24 +62,24 @@ def _genome(name: str = "Test Agent") -> dict:
 
 
 def test_create_list_and_get_summary():
-    out = _call("axiomgraph_create_agent", genome=_genome())
+    out = _call("verdigraph_create_agent", genome=_genome())
     payload = json.loads(out)
     assert "agent_id" in payload
     aid = payload["agent_id"]
     assert payload["summary"]["nodes"]
 
-    listing = json.loads(_call("axiomgraph_list_agents"))
+    listing = json.loads(_call("verdigraph_list_agents"))
     assert any(a["agent_id"] == aid for a in listing["agents"])
 
-    summary = json.loads(_call("axiomgraph_get_graph_summary", agent_id=aid))
+    summary = json.loads(_call("verdigraph_get_graph_summary", agent_id=aid))
     assert summary["agent_id"] == aid
     assert {n["id"] for n in summary["nodes"]} >= {"planner", "tool_router"}
 
 
 def test_submit_evaluation_evolves_graph_and_writes_ledger():
-    aid = json.loads(_call("axiomgraph_create_agent", genome=_genome()))["agent_id"]
+    aid = json.loads(_call("verdigraph_create_agent", genome=_genome()))["agent_id"]
     out = _call(
-        "axiomgraph_submit_evaluation",
+        "verdigraph_submit_evaluation",
         agent_id=aid,
         task_id="t1",
         task_type="general",
@@ -94,10 +94,10 @@ def test_submit_evaluation_evolves_graph_and_writes_ledger():
 
 
 def test_best_next_steps_returns_ranked_routes():
-    aid = json.loads(_call("axiomgraph_create_agent", genome=_genome()))["agent_id"]
+    aid = json.loads(_call("verdigraph_create_agent", genome=_genome()))["agent_id"]
     for i in range(2):
         _call(
-            "axiomgraph_submit_evaluation",
+            "verdigraph_submit_evaluation",
             agent_id=aid,
             task_id=f"t{i}",
             task_type="general",
@@ -106,7 +106,7 @@ def test_best_next_steps_returns_ranked_routes():
             used_edges=[("planner", "tool_router")],
             used_nodes=["planner", "tool_router"],
         )
-    out = json.loads(_call("axiomgraph_best_next_steps", agent_id=aid, from_node="planner", limit=2))
+    out = json.loads(_call("verdigraph_best_next_steps", agent_id=aid, from_node="planner", limit=2))
     assert out["from_node"] == "planner"
     assert len(out["routes"]) >= 1
     # Scores must be non-increasing.
@@ -115,9 +115,9 @@ def test_best_next_steps_returns_ranked_routes():
 
 
 def test_save_and_load_roundtrip(tmp_path):
-    aid = json.loads(_call("axiomgraph_create_agent", genome=_genome("Persistable Agent")))["agent_id"]
+    aid = json.loads(_call("verdigraph_create_agent", genome=_genome("Persistable Agent")))["agent_id"]
     _call(
-        "axiomgraph_submit_evaluation",
+        "verdigraph_submit_evaluation",
         agent_id=aid,
         task_id="t1",
         task_type="general",
@@ -126,14 +126,14 @@ def test_save_and_load_roundtrip(tmp_path):
         used_edges=[("planner", "tool_router")],
         used_nodes=["planner", "tool_router"],
     )
-    saved = json.loads(_call("axiomgraph_save_agent_state", agent_id=aid))
+    saved = json.loads(_call("verdigraph_save_agent_state", agent_id=aid))
     assert Path(saved["path"]).exists()
 
-    _call("axiomgraph_delete_agent", agent_id=aid, remove_file=False)
+    _call("verdigraph_delete_agent", agent_id=aid, remove_file=False)
 
-    loaded = json.loads(_call("axiomgraph_load_agent_state", source_path=saved["path"]))
+    loaded = json.loads(_call("verdigraph_load_agent_state", source_path=saved["path"]))
     new_aid = loaded["agent_id"]
-    summary = json.loads(_call("axiomgraph_get_graph_summary", agent_id=new_aid))
+    summary = json.loads(_call("verdigraph_get_graph_summary", agent_id=new_aid))
     # The restored graph should retain the edge we strengthened.
     edge = next((e for e in summary["edges"] if e["from"] == "planner" and e["to"] == "tool_router"), None)
     assert edge is not None
@@ -142,7 +142,7 @@ def test_save_and_load_roundtrip(tmp_path):
 
 def test_choose_compute_profile_enforces_min_quality():
     err = _call(
-        "axiomgraph_choose_compute_profile",
+        "verdigraph_choose_compute_profile",
         profiles=[{"id": "weak", "quality_score": 0.5, "local": True}],
         task={"id": "t", "task_type": "x", "min_quality": 0.80, "requires_local": True},
     )
@@ -151,7 +151,7 @@ def test_choose_compute_profile_enforces_min_quality():
 
 def test_choose_compute_profile_returns_decision():
     out = _call(
-        "axiomgraph_choose_compute_profile",
+        "verdigraph_choose_compute_profile",
         profiles=[
             {"id": "cheap_cache", "kind": "cache", "quality_score": 0.85, "latency_ms": 10, "local": True},
             {"id": "expensive_cloud", "kind": "api_model", "quality_score": 0.95, "cost_per_1k_input_tokens": 0.01, "latency_ms": 2000},
@@ -164,7 +164,7 @@ def test_choose_compute_profile_returns_decision():
 
 
 def test_cache_and_escalation_policy_tools():
-    assert json.loads(_call("axiomgraph_should_use_cache", cache_confidence=0.92, task_risk=0.2))["should_use_cache"]
-    assert not json.loads(_call("axiomgraph_should_use_cache", cache_confidence=0.92, task_risk=0.8))["should_use_cache"]
-    assert json.loads(_call("axiomgraph_should_escalate", current_confidence=0.5, task_risk=0.7))["should_escalate"]
-    assert not json.loads(_call("axiomgraph_should_escalate", current_confidence=0.95, task_risk=0.7))["should_escalate"]
+    assert json.loads(_call("verdigraph_should_use_cache", cache_confidence=0.92, task_risk=0.2))["should_use_cache"]
+    assert not json.loads(_call("verdigraph_should_use_cache", cache_confidence=0.92, task_risk=0.8))["should_use_cache"]
+    assert json.loads(_call("verdigraph_should_escalate", current_confidence=0.5, task_risk=0.7))["should_escalate"]
+    assert not json.loads(_call("verdigraph_should_escalate", current_confidence=0.95, task_risk=0.7))["should_escalate"]

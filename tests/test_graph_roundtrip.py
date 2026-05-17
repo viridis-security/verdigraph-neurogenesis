@@ -1,10 +1,10 @@
-"""Round-trip serialization is the durability boundary for AxiomGraph.
+"""Round-trip serialization is the durability boundary for Verdigraph.
 
 If `CognitiveGraph.to_dict()` and `from_dict()` lose state, `agent.save_state`
 silently corrupts evolved agents. These tests pin the invariant.
 """
 
-from axiomgraph.graph import CognitiveEdge, CognitiveGraph, CognitiveNode
+from verdigraph.graph import CognitiveEdge, CognitiveGraph, CognitiveNode
 
 
 def test_graph_to_dict_from_dict_preserves_state():

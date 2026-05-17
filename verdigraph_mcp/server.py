@@ -1,10 +1,10 @@
-"""FastMCP stdio server for AxiomGraph NeuroGenesis.
+"""FastMCP stdio server for Verdigraph NeuroGenesis.
 
 Usage (after `pip install -e ".[mcp]"`):
-    axiomgraph-mcp                          # stdio transport
-    AXIOMGRAPH_STATE_DIR=~/.axiomgraph axiomgraph-mcp
+    verdigraph-mcp                          # stdio transport
+    VERDIGRAPH_STATE_DIR=~/.verdigraph verdigraph-mcp
 
-Tools follow the `axiomgraph_*` naming convention so they don't collide with
+Tools follow the `verdigraph_*` naming convention so they don't collide with
 other MCP servers an agent may have connected.
 """
 
@@ -16,13 +16,13 @@ from typing import Any, Dict, List, Optional, Tuple
 from mcp.server.fastmcp import FastMCP
 from pydantic import BaseModel, ConfigDict, Field
 
-from axiomgraph.compute import ComputeOptimizer, ComputeProfile, TaskProfile
-from axiomgraph.evaluation import EvaluationResult
+from verdigraph.compute import ComputeOptimizer, ComputeProfile, TaskProfile
+from verdigraph.evaluation import EvaluationResult
 
 from .registry import AgentRegistry
 
 
-mcp = FastMCP("axiomgraph_mcp")
+mcp = FastMCP("verdigraph_mcp")
 _registry = AgentRegistry()
 
 
@@ -44,7 +44,7 @@ class CreateAgentInput(_Strict):
 
 
 class AgentIdInput(_Strict):
-    agent_id: str = Field(..., description="ID returned by axiomgraph_create_agent or axiomgraph_list_agents.", min_length=1)
+    agent_id: str = Field(..., description="ID returned by verdigraph_create_agent or verdigraph_list_agents.", min_length=1)
 
 
 class GetLedgerInput(_Strict):
@@ -83,7 +83,7 @@ class SaveAgentInput(_Strict):
 
 
 class LoadAgentInput(_Strict):
-    source_path: str = Field(..., description="Path to a JSON state file written by axiomgraph_save_agent_state.", min_length=1)
+    source_path: str = Field(..., description="Path to a JSON state file written by verdigraph_save_agent_state.", min_length=1)
     agent_id: Optional[str] = Field(default=None, description="Optional explicit agent_id; otherwise slugified from the genome name.")
 
 
@@ -176,10 +176,10 @@ def _graph_summary(agent_id: str) -> dict:
 # ================================== tools ===================================
 
 @mcp.tool(
-    name="axiomgraph_create_agent",
-    annotations={"title": "Create AxiomGraph agent", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False},
+    name="verdigraph_create_agent",
+    annotations={"title": "Create Verdigraph agent", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False},
 )
-async def axiomgraph_create_agent(params: CreateAgentInput) -> str:
+async def verdigraph_create_agent(params: CreateAgentInput) -> str:
     """Instantiate a developmental agent from a genome dict and register it.
 
     Returns a JSON object with the assigned `agent_id` and an initial graph summary.
@@ -192,19 +192,19 @@ async def axiomgraph_create_agent(params: CreateAgentInput) -> str:
 
 
 @mcp.tool(
-    name="axiomgraph_list_agents",
+    name="verdigraph_list_agents",
     annotations={"title": "List registered agents", "readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
 )
-async def axiomgraph_list_agents() -> str:
+async def verdigraph_list_agents() -> str:
     """List every agent currently in the registry, with a compact summary."""
     return _dump({"agents": _registry.list_agents()})
 
 
 @mcp.tool(
-    name="axiomgraph_get_graph_summary",
+    name="verdigraph_get_graph_summary",
     annotations={"title": "Get agent graph summary", "readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
 )
-async def axiomgraph_get_graph_summary(params: AgentIdInput) -> str:
+async def verdigraph_get_graph_summary(params: AgentIdInput) -> str:
     """Return a compact JSON view of an agent's cognitive graph (nodes + edges + stats)."""
     try:
         return _dump(_graph_summary(params.agent_id))
@@ -213,10 +213,10 @@ async def axiomgraph_get_graph_summary(params: AgentIdInput) -> str:
 
 
 @mcp.tool(
-    name="axiomgraph_get_agent_state",
+    name="verdigraph_get_agent_state",
     annotations={"title": "Get full agent state", "readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
 )
-async def axiomgraph_get_agent_state(params: AgentIdInput) -> str:
+async def verdigraph_get_agent_state(params: AgentIdInput) -> str:
     """Return the full agent state dict — genome, graph, ledger. Same shape as save_state output."""
     try:
         return _dump(_registry.get(params.agent_id).to_dict())
@@ -225,10 +225,10 @@ async def axiomgraph_get_agent_state(params: AgentIdInput) -> str:
 
 
 @mcp.tool(
-    name="axiomgraph_submit_evaluation",
+    name="verdigraph_submit_evaluation",
     annotations={"title": "Submit task evaluation", "readOnlyHint": False, "destructiveHint": True, "idempotentHint": False, "openWorldHint": False},
 )
-async def axiomgraph_submit_evaluation(params: SubmitEvaluationInput) -> str:
+async def verdigraph_submit_evaluation(params: SubmitEvaluationInput) -> str:
     """Apply a task evaluation to the agent. This triggers growth, reinforcement, and pruning per the genome.
 
     Returns a JSON object with the updated graph summary and the new ledger events generated by this evaluation.
@@ -259,10 +259,10 @@ async def axiomgraph_submit_evaluation(params: SubmitEvaluationInput) -> str:
 
 
 @mcp.tool(
-    name="axiomgraph_best_next_steps",
+    name="verdigraph_best_next_steps",
     annotations={"title": "Best next routing steps", "readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
 )
-async def axiomgraph_best_next_steps(params: BestNextStepsInput) -> str:
+async def verdigraph_best_next_steps(params: BestNextStepsInput) -> str:
     """Return the top-k outgoing routes from a node, ranked by edge_score = weight·trust·success_rate / (cost·latency·risk)."""
     try:
         agent = _registry.get(params.agent_id)
@@ -275,10 +275,10 @@ async def axiomgraph_best_next_steps(params: BestNextStepsInput) -> str:
 
 
 @mcp.tool(
-    name="axiomgraph_get_ledger",
+    name="verdigraph_get_ledger",
     annotations={"title": "Get developmental ledger", "readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
 )
-async def axiomgraph_get_ledger(params: GetLedgerInput) -> str:
+async def verdigraph_get_ledger(params: GetLedgerInput) -> str:
     """Return the most recent `limit` events from the agent's developmental ledger."""
     try:
         agent = _registry.get(params.agent_id)
@@ -292,10 +292,10 @@ async def axiomgraph_get_ledger(params: GetLedgerInput) -> str:
 
 
 @mcp.tool(
-    name="axiomgraph_save_agent_state",
+    name="verdigraph_save_agent_state",
     annotations={"title": "Persist agent state to disk", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True},
 )
-async def axiomgraph_save_agent_state(params: SaveAgentInput) -> str:
+async def verdigraph_save_agent_state(params: SaveAgentInput) -> str:
     """Persist the agent's full state to the registry's state directory as `<agent_id>.json`."""
     try:
         path = _registry.save(params.agent_id)
@@ -305,10 +305,10 @@ async def axiomgraph_save_agent_state(params: SaveAgentInput) -> str:
 
 
 @mcp.tool(
-    name="axiomgraph_load_agent_state",
+    name="verdigraph_load_agent_state",
     annotations={"title": "Load agent state from disk", "readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": True},
 )
-async def axiomgraph_load_agent_state(params: LoadAgentInput) -> str:
+async def verdigraph_load_agent_state(params: LoadAgentInput) -> str:
     """Load an agent state JSON file into the registry. Returns the assigned agent_id."""
     try:
         agent_id = _registry.load(params.source_path, agent_id=params.agent_id)
@@ -318,20 +318,20 @@ async def axiomgraph_load_agent_state(params: LoadAgentInput) -> str:
 
 
 @mcp.tool(
-    name="axiomgraph_delete_agent",
+    name="verdigraph_delete_agent",
     annotations={"title": "Remove agent from registry", "readOnlyHint": False, "destructiveHint": True, "idempotentHint": True, "openWorldHint": True},
 )
-async def axiomgraph_delete_agent(params: DeleteAgentInput) -> str:
+async def verdigraph_delete_agent(params: DeleteAgentInput) -> str:
     """Remove an agent from the in-memory registry. Optionally also delete its on-disk state file."""
     _registry.delete(params.agent_id, remove_file=params.remove_file)
     return _dump({"deleted": params.agent_id, "remove_file": params.remove_file})
 
 
 @mcp.tool(
-    name="axiomgraph_choose_compute_profile",
+    name="verdigraph_choose_compute_profile",
     annotations={"title": "Choose cheapest reliable compute profile", "readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
 )
-async def axiomgraph_choose_compute_profile(params: ChooseProfileInput) -> str:
+async def verdigraph_choose_compute_profile(params: ChooseProfileInput) -> str:
     """Pick the cheapest reliable compute profile for a task.
 
     Enforces `min_quality` as a hard contract: any profile below the task's minimum quality
@@ -356,10 +356,10 @@ async def axiomgraph_choose_compute_profile(params: ChooseProfileInput) -> str:
 
 
 @mcp.tool(
-    name="axiomgraph_should_use_cache",
+    name="verdigraph_should_use_cache",
     annotations={"title": "Cache policy decision", "readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
 )
-async def axiomgraph_should_use_cache(params: CachePolicyInput) -> str:
+async def verdigraph_should_use_cache(params: CachePolicyInput) -> str:
     """Return True if cached reasoning is likely safe and efficient for this confidence/risk pair."""
     decision = ComputeOptimizer.should_use_cache(
         cache_confidence=params.cache_confidence,
@@ -370,10 +370,10 @@ async def axiomgraph_should_use_cache(params: CachePolicyInput) -> str:
 
 
 @mcp.tool(
-    name="axiomgraph_should_escalate",
+    name="verdigraph_should_escalate",
     annotations={"title": "Escalation policy decision", "readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False},
 )
-async def axiomgraph_should_escalate(params: EscalationPolicyInput) -> str:
+async def verdigraph_should_escalate(params: EscalationPolicyInput) -> str:
     """Return True if the current route should escalate to a stronger model or evaluator."""
     decision = ComputeOptimizer.should_escalate(
         current_confidence=params.current_confidence,

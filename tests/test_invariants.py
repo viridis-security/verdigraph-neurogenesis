@@ -7,9 +7,9 @@ not pass quietly.
 
 import pytest
 
-from axiomgraph import AgentGenome, DevelopmentalAgent
-from axiomgraph.evaluation import EvaluationResult
-from axiomgraph.genome import GrowthRules
+from verdigraph import AgentGenome, DevelopmentalAgent
+from verdigraph.evaluation import EvaluationResult
+from verdigraph.genome import GrowthRules
 
 
 def _genome(**overrides) -> AgentGenome:

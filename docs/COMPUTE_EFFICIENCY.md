@@ -1,6 +1,6 @@
-# AxiomGraph Compute Efficiency Layer
+# Verdigraph Compute Efficiency Layer
 
-AxiomGraph can improve AI-agent compute efficiency on local GPUs, cloud transformer APIs, or hybrid stacks by optimizing agent-level routing. It does not make transformer matrix multiplication itself cheaper; instead, it reduces wasted model calls, tool loops, token volume, context bloat, latency, and unnecessary escalation to expensive models.
+Verdigraph can improve AI-agent compute efficiency on local GPUs, cloud transformer APIs, or hybrid stacks by optimizing agent-level routing. It does not make transformer matrix multiplication itself cheaper; instead, it reduces wasted model calls, tool loops, token volume, context bloat, latency, and unnecessary escalation to expensive models.
 
 ## Core invariant
 
@@ -50,7 +50,7 @@ Task arrives
 
 ## Local GPU use
 
-For local inference, AxiomGraph can learn when to use:
+For local inference, Verdigraph can learn when to use:
 
 - a small classifier
 - a quantized local model
@@ -62,7 +62,7 @@ For local inference, AxiomGraph can learn when to use:
 
 ## Cloud transformer use
 
-For API-based agents, AxiomGraph can reduce costs by:
+For API-based agents, Verdigraph can reduce costs by:
 
 - using cheaper models for easy tasks
 - trimming irrelevant context
@@ -73,7 +73,7 @@ For API-based agents, AxiomGraph can reduce costs by:
 
 ## New module
 
-The repo includes `axiomgraph.compute`:
+The repo includes `verdigraph.compute`:
 
 - `ComputeProfile` describes a model, tool, cache, or backend.
 - `TaskProfile` describes task difficulty, risk, and token expectations.
@@ -83,7 +83,7 @@ The repo includes `axiomgraph.compute`:
 ## Example
 
 ```python
-from axiomgraph.compute import ComputeOptimizer, ComputeProfile, TaskProfile
+from verdigraph.compute import ComputeOptimizer, ComputeProfile, TaskProfile
 
 profiles = [
     ComputeProfile(id="local_3b", kind="local_model", quality_score=0.62, latency_ms=450, gpu_memory_gb=3.5, local=True),
@@ -98,7 +98,7 @@ print(decision.profile_id)
 
 ## Product positioning
 
-AxiomGraph can be positioned as an agent compute optimizer:
+Verdigraph can be positioned as an agent compute optimizer:
 
 > A self-learning cognitive routing layer that reduces AI-agent compute waste by learning the cheapest reliable route for each task.
 

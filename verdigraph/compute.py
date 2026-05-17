@@ -79,7 +79,7 @@ class EfficiencyReport:
 
 
 class ComputeOptimizer:
-    """Compute-aware routing layer for AxiomGraph.
+    """Compute-aware routing layer for Verdigraph.
 
     This class does not optimize transformer kernels directly. Instead, it optimizes
     agent-level compute by choosing the cheapest reliable execution path: cache,

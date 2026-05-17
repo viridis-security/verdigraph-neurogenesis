@@ -1,4 +1,4 @@
-"""AxiomGraph NeuroGenesis core package."""
+"""Verdigraph NeuroGenesis core package."""
 
 from .agent import DevelopmentalAgent
 from .genome import AgentGenome, GrowthRules, SafetyAxioms

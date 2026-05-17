@@ -4,12 +4,12 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from axiomgraph import DevelopmentalAgent
-from axiomgraph.io import load_genome
+from verdigraph import DevelopmentalAgent
+from verdigraph.io import load_genome
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Create an initial AxiomGraph agent state from a genome JSON file.")
+    parser = argparse.ArgumentParser(description="Create an initial Verdigraph agent state from a genome JSON file.")
     parser.add_argument("genome", help="Path to genome JSON")
     parser.add_argument("output", help="Path for output state JSON")
     args = parser.parse_args()

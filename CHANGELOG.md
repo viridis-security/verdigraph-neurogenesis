@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to AxiomGraph NeuroGenesis are documented here.
+All notable changes to Verdigraph NeuroGenesis are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
@@ -13,15 +13,15 @@ plus the Phase 2 MCP runtime layer.
 
 ### Added
 
-- **Core package `axiomgraph/`** — genome, cognitive graph, growth engine,
+- **Core package `verdigraph/`** — genome, cognitive graph, growth engine,
   pruning engine, router, evaluation, developmental ledger, and the
   compute-efficiency layer.
-- **MCP server `axiomgraph_mcp/`** — stdio Model Context Protocol server
+- **MCP server `verdigraph_mcp/`** — stdio Model Context Protocol server
   with a thread-safe multi-agent registry, file-backed persistence, and
-  thirteen tools prefixed `axiomgraph_*`. Installable via `pip install -e
-  ".[mcp]"`; entry point `axiomgraph-mcp`.
+  thirteen tools prefixed `verdigraph_*`. Installable via `pip install -e
+  ".[mcp]"`; entry point `verdigraph-mcp`.
 - **Companion papers in `papers/`** — Physical NeuroGenesis (SynapseForge),
-  Digital NeuroGenesis (AxiomGraph), and Compute Efficiency.
+  Digital NeuroGenesis (Verdigraph), and Compute Efficiency.
 - **Examples** — hypothetical research-agent and service-agent genomes,
   end-to-end demos (`run_demo.py`, `compute_efficiency_demo.py`), and an
   interactive Compute Cost Calculator (`compute_cost_calculator.html`).

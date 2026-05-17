@@ -1,16 +1,16 @@
-# AxiomGraph Compute Efficiency: A Self-Optimizing Cognitive Routing Layer for Local GPU and Transformer-Based AI Agents
+# Verdigraph Compute Efficiency: A Self-Optimizing Cognitive Routing Layer for Local GPU and Transformer-Based AI Agents
 
 ## Abstract
 
-This paper extends the AxiomGraph developmental agent framework into a compute-efficiency architecture. The central claim is that AI-agent systems can become cheaper, faster, and more reliable by learning which cognitive pathways deserve compute and which should be pruned, cached, compressed, or escalated. AxiomGraph does not directly alter transformer kernels or the internal matrix operations of neural networks. Instead, it improves efficiency at the agent orchestration layer by modeling cognition as a dynamic graph of nodes and synapses, where each pathway tracks task success, cost, latency, token usage, GPU memory pressure, risk, and reliability.
+This paper extends the Verdigraph developmental agent framework into a compute-efficiency architecture. The central claim is that AI-agent systems can become cheaper, faster, and more reliable by learning which cognitive pathways deserve compute and which should be pruned, cached, compressed, or escalated. Verdigraph does not directly alter transformer kernels or the internal matrix operations of neural networks. Instead, it improves efficiency at the agent orchestration layer by modeling cognition as a dynamic graph of nodes and synapses, where each pathway tracks task success, cost, latency, token usage, GPU memory pressure, risk, and reliability.
 
-The resulting system can operate across local GPUs, cloud transformer APIs, or hybrid local/cloud deployments. It can choose when to use a small local model, a larger model, a cached workflow, a retrieval path, a specialized tool, or a high-assurance evaluator. The key invariant is to maximize successful task completion per unit compute. This makes AxiomGraph both a developmental AI framework and a practical compute optimizer for production AI agents.
+The resulting system can operate across local GPUs, cloud transformer APIs, or hybrid local/cloud deployments. It can choose when to use a small local model, a larger model, a cached workflow, a retrieval path, a specialized tool, or a high-assurance evaluator. The key invariant is to maximize successful task completion per unit compute. This makes Verdigraph both a developmental AI framework and a practical compute optimizer for production AI agents.
 
 ## 1. Introduction
 
 Modern AI agents often waste compute. A simple task may be routed through an unnecessarily large model. A repeated task may be solved from scratch. A workflow may retrieve too much memory, call too many tools, or loop through failed reasoning paths. These inefficiencies increase API costs, GPU usage, latency, and operational complexity.
 
-AxiomGraph reframes this problem. Instead of treating an agent as a static chain of prompts and tools, it treats the agent as an evolving cognitive graph. Nodes represent models, tools, memory systems, evaluators, planners, routers, and specialized modules. Edges represent pathways with measurable properties, including routing strength, trust, success rate, token cost, latency, risk, and plasticity.
+Verdigraph reframes this problem. Instead of treating an agent as a static chain of prompts and tools, it treats the agent as an evolving cognitive graph. Nodes represent models, tools, memory systems, evaluators, planners, routers, and specialized modules. Edges represent pathways with measurable properties, including routing strength, trust, success rate, token cost, latency, risk, and plasticity.
 
 This graph allows the agent to learn which cognitive routes work for which task types. Over time, efficient successful routes strengthen, while expensive unreliable routes weaken or are pruned.
 
@@ -20,7 +20,7 @@ The central thesis is:
 
 > AI-agent compute efficiency can be improved by continuously learning the cheapest reliable cognitive route for each task.
 
-This is not a claim that AxiomGraph makes transformer attention itself physically cheaper. Rather, it reduces the frequency, size, and complexity of expensive transformer calls by optimizing the orchestration layer around the model.
+This is not a claim that Verdigraph makes transformer attention itself physically cheaper. Rather, it reduces the frequency, size, and complexity of expensive transformer calls by optimizing the orchestration layer around the model.
 
 ## 3. Compute Efficiency Invariant
 
@@ -59,7 +59,7 @@ Common sources of waste include:
 9. Retrying failed workflows without changing strategy.
 10. Using cloud calls when a local model is sufficient.
 
-AxiomGraph addresses these failures through adaptive routing, evaluation, caching, and pruning.
+Verdigraph addresses these failures through adaptive routing, evaluation, caching, and pruning.
 
 ## 5. Architecture
 
@@ -117,7 +117,7 @@ Every decision is logged so the system can learn which routes produced the best 
 
 ## 6. Local GPU Optimization
 
-For local systems, AxiomGraph can reduce GPU load by choosing among multiple local execution options.
+For local systems, Verdigraph can reduce GPU load by choosing among multiple local execution options.
 
 Example routing:
 
@@ -133,7 +133,7 @@ The system can also learn when to unload unused models, batch similar tasks, lim
 
 ## 7. Cloud Transformer Optimization
 
-For cloud transformer APIs, AxiomGraph can reduce cost by:
+For cloud transformer APIs, Verdigraph can reduce cost by:
 
 - using cheaper models for easy tasks;
 - sending only relevant memory;
@@ -153,7 +153,7 @@ The strongest architecture is hybrid:
 local classifier -> local small model -> local memory/retrieval -> cloud model only when needed -> evaluator only when risk requires
 ```
 
-AxiomGraph learns which tasks can remain local and which require stronger remote inference.
+Verdigraph learns which tasks can remain local and which require stronger remote inference.
 
 ## 9. Digital Synapse Cost Model
 
@@ -184,7 +184,7 @@ This makes cognitive routing explicitly compute-aware.
 
 ## 10. Growth and Pruning for Efficiency
 
-AxiomGraph growth adds specialized modules when they repeatedly improve task success. AxiomGraph pruning removes or weakens pathways that are costly, unreliable, redundant, or unsafe.
+Verdigraph growth adds specialized modules when they repeatedly improve task success. Verdigraph pruning removes or weakens pathways that are costly, unreliable, redundant, or unsafe.
 
 Growth improves specialization. Pruning improves efficiency.
 
@@ -192,11 +192,11 @@ Together they create a self-optimizing agent architecture.
 
 ## 11. Product Implication
 
-The compute-efficiency layer may be the strongest near-term product path for AxiomGraph.
+The compute-efficiency layer may be the strongest near-term product path for Verdigraph.
 
 The market-facing claim is:
 
-> AxiomGraph reduces AI-agent compute waste by learning the cheapest reliable cognitive route for every task.
+> Verdigraph reduces AI-agent compute waste by learning the cheapest reliable cognitive route for every task.
 
 This product can be sold before any physical NeuroGenesis hardware exists.
 
@@ -218,7 +218,7 @@ Phase 7: Use this digital efficiency architecture as the control layer for futur
 
 ## 13. Conclusion
 
-AxiomGraph can increase compute efficiency for AI agents running locally on GPUs, through transformer APIs, or across hybrid stacks. Its contribution is not a lower-level accelerator kernel, but a higher-level cognitive routing architecture. By tracking which pathways work, what they cost, and when they should be reused or pruned, AxiomGraph can make agents cheaper, faster, more specialized, and more reliable.
+Verdigraph can increase compute efficiency for AI agents running locally on GPUs, through transformer APIs, or across hybrid stacks. Its contribution is not a lower-level accelerator kernel, but a higher-level cognitive routing architecture. By tracking which pathways work, what they cost, and when they should be reused or pruned, Verdigraph can make agents cheaper, faster, more specialized, and more reliable.
 
 The final thesis is:
 

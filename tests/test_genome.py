@@ -1,6 +1,6 @@
 import pytest
 
-from axiomgraph.genome import AgentGenome, GrowthRules
+from verdigraph.genome import AgentGenome, GrowthRules
 
 
 def test_valid_genome_passes_validation():

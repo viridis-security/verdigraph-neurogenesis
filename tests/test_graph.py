@@ -1,6 +1,6 @@
 import pytest
 
-from axiomgraph.graph import CognitiveEdge, CognitiveGraph, CognitiveNode
+from verdigraph.graph import CognitiveEdge, CognitiveGraph, CognitiveNode
 
 
 def test_graph_adds_nodes_and_edges():

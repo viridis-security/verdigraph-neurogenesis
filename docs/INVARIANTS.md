@@ -1,4 +1,4 @@
-# AxiomGraph Invariants
+# Verdigraph Invariants
 
 1. Every cognitive structure must be inspectable.
 2. Every growth event must be logged.

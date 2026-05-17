@@ -8,9 +8,9 @@ would silently rebuild agents with default rules.
 
 from pathlib import Path
 
-from axiomgraph import AgentGenome, DevelopmentalAgent
-from axiomgraph.evaluation import EvaluationResult
-from axiomgraph.genome import GrowthRules, SafetyAxioms
+from verdigraph import AgentGenome, DevelopmentalAgent
+from verdigraph.evaluation import EvaluationResult
+from verdigraph.genome import GrowthRules, SafetyAxioms
 
 
 def _evolved_agent() -> DevelopmentalAgent:

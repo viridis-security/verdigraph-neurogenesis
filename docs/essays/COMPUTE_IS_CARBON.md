@@ -80,9 +80,9 @@ Every one of these is a routing decision. Every routing decision can be
 measured, scored, and learned from. The substrate to do that learning is
 what we have built.
 
-## IV. AxiomGraph
+## IV. Verdigraph
 
-AxiomGraph treats an AI agent as a developmental cognitive system rather
+Verdigraph treats an AI agent as a developmental cognitive system rather
 than a static prompt-and-tool assembly. The agent is a graph of cognitive
 nodes — modules for planning, retrieval, synthesis, evaluation, tool use,
 safety — connected by weighted synaptic edges. Each edge tracks routing
@@ -128,7 +128,7 @@ bill by forty percent and here is the developmental ledger documenting
 every routing decision the system made over the measurement period" is an
 audit artifact.
 
-AxiomGraph's ledger is not optional. Every growth event, every edge
+Verdigraph's ledger is not optional. Every growth event, every edge
 strengthening, every pruning action writes a structured log entry with
 event type, reason, payload, and ISO-8601 timestamp. The protected nodes
 declared in the genome cannot be silently removed. The maximum graph size
@@ -140,7 +140,7 @@ Article 12 logging requirements, the forthcoming US executive order
 guidance, the audit standards being drafted by SOC 2 and ISO around
 generative AI — all converge on auditable logs of agent development and
 decision-making. Most production agent stacks cannot produce these logs
-without retrofitting. AxiomGraph produces them by construction.
+without retrofitting. Verdigraph produces them by construction.
 
 Second, the auditable ledger is what makes compute-to-carbon claims
 verifiable. Without a record of what the system chose to do, "compute
@@ -151,7 +151,7 @@ reduction your auditor will sign.
 ## VI. The compute-to-carbon equation
 
 Once you have an auditable record of compute consumed under a baseline
-policy and compute consumed under the AxiomGraph policy, the rest is
+policy and compute consumed under the Verdigraph policy, the rest is
 arithmetic. Tokens map to FLOPs map to joules via published efficiency
 factors for each model family. Joules map to kilowatt-hours. Kilowatt-hours
 map to CO2-equivalent emissions via the operator's local grid carbon
@@ -162,7 +162,7 @@ The math is not mysterious. The reason nobody has been doing it is that
 nobody has had an auditable ledger over which to compute it. We do.
 
 A future *Verified Compute-Efficiency Report* — an artifact we plan to
-ship as a paid product — turns a customer's AxiomGraph ledger over a
+ship as a paid product — turns a customer's Verdigraph ledger over a
 measurement period into:
 
 - Total token volume saved versus a stated baseline policy
@@ -195,7 +195,7 @@ incentives and regulatory pressure on a one-to-three-year timeline.
 
 ## VIII. The connection to conservation
 
-Viridis LLC is a conservation technology company. AxiomGraph is one of
+Viridis LLC is a conservation technology company. Verdigraph is one of
 three interconnected projects in our portfolio. The others are HDFM, our
 high-density forest management agent platform, and Sentinel / OpenClaw,
 our auditable security research agent. All three sit on the same
@@ -205,7 +205,7 @@ work. All three are scored against the same thermodynamic floor.
 The reason a conservation technology company is shipping an AI infrastructure
 framework is that compute is carbon, carbon is climate, climate is
 biodiversity, and biodiversity is the thing we are in the business of
-preserving. The connection runs all the way down. AxiomGraph is the layer
+preserving. The connection runs all the way down. Verdigraph is the layer
 where software meets physics meets the budget for a habitable Earth.
 
 This is also why we believe the framework should be free and open. The
@@ -222,7 +222,7 @@ find out. Five minutes of setup, two weeks of measurement, and you will
 have a number.
 
 If you are doing research on agent development, specialization, compute
-efficiency, or the thermodynamics of intelligence, AxiomGraph is a
+efficiency, or the thermodynamics of intelligence, Verdigraph is a
 substrate purpose-built for those questions. The code is yours to extend.
 The papers are yours to cite. The conversation is yours to join.
 
@@ -242,7 +242,7 @@ it. We would like your help.
 
 ---
 
-*The code is at [github.com/VIRIDIS/axiomgraph-neurogenesis](https://github.com/VIRIDIS/axiomgraph-neurogenesis). The papers are in the
+*The code is at [github.com/VIRIDIS/verdigraph-neurogenesis](https://github.com/VIRIDIS/verdigraph-neurogenesis). The papers are in the
 [`papers/`](../../papers/) directory of the repository. The MCP server is in
-[`axiomgraph_mcp/`](../../axiomgraph_mcp/). If any of this resonates, get
+[`verdigraph_mcp/`](../../verdigraph_mcp/). If any of this resonates, get
 in touch.*

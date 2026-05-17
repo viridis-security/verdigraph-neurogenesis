@@ -4,9 +4,9 @@ import sys
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT.parent))
 
-from axiomgraph import DevelopmentalAgent
-from axiomgraph.evaluation import EvaluationResult
-from axiomgraph.io import load_genome
+from verdigraph import DevelopmentalAgent
+from verdigraph.evaluation import EvaluationResult
+from verdigraph.io import load_genome
 
 def main() -> None:
     genome = load_genome(ROOT / "hypothetical_research_agent.genome.json")

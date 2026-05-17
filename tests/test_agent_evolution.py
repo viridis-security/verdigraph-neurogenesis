@@ -1,5 +1,5 @@
-from axiomgraph import AgentGenome, DevelopmentalAgent
-from axiomgraph.evaluation import EvaluationResult
+from verdigraph import AgentGenome, DevelopmentalAgent
+from verdigraph.evaluation import EvaluationResult
 
 
 def test_success_strengthens_edge():

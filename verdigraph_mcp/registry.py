@@ -2,9 +2,9 @@
 
 Invariants:
 - Every mutation goes through `DevelopmentalAgent.process_evaluation` (never
-  bypasses AxiomGraph safety invariants).
-- Persistence directory is configurable via `AXIOMGRAPH_STATE_DIR` env var or
-  the `state_dir` constructor argument; defaults to `./axiomgraph_state/`.
+  bypasses Verdigraph safety invariants).
+- Persistence directory is configurable via `VERDIGRAPH_STATE_DIR` env var or
+  the `state_dir` constructor argument; defaults to `./verdigraph_state/`.
 - Agent IDs are slugified from the agent name plus a short suffix to avoid
   collisions across registry restarts.
 """
@@ -18,7 +18,7 @@ import threading
 from pathlib import Path
 from typing import Dict, List
 
-from axiomgraph import AgentGenome, DevelopmentalAgent
+from verdigraph import AgentGenome, DevelopmentalAgent
 
 
 _SLUG_RE = re.compile(r"[^a-z0-9_-]+")
@@ -33,8 +33,8 @@ class AgentRegistry:
     """Thread-safe registry of named developmental agents."""
 
     def __init__(self, state_dir: str | Path | None = None) -> None:
-        env = os.environ.get("AXIOMGRAPH_STATE_DIR")
-        chosen = state_dir or env or Path.cwd() / "axiomgraph_state"
+        env = os.environ.get("VERDIGRAPH_STATE_DIR")
+        chosen = state_dir or env or Path.cwd() / "verdigraph_state"
         self.state_dir = Path(chosen).expanduser().resolve()
         self.state_dir.mkdir(parents=True, exist_ok=True)
         self._agents: Dict[str, DevelopmentalAgent] = {}
