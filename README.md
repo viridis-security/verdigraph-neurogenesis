@@ -81,6 +81,17 @@ pytest
 10. Digital development should remain translatable to future physical substrates.
 11. Agent routing should maximize successful task completion per unit compute.
 
+## Run as an MCP server
+
+AxiomGraph ships with a stdio Model Context Protocol server so Claude Desktop, Cowork, Claude Code, and other MCP-compatible clients can drive it directly.
+
+```bash
+pip install -e ".[mcp]"
+axiomgraph-mcp
+```
+
+See [docs/MCP_SERVER.md](docs/MCP_SERVER.md) for the full tool list and a `claude_desktop_config.json` snippet.
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). New work must preserve the design invariants in [docs/INVARIANTS.md](docs/INVARIANTS.md) and include tests.

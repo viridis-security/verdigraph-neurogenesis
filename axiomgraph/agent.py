@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import asdict
 from pathlib import Path
 from .evaluation import EvaluationResult
 from .genome import AgentGenome
@@ -62,13 +63,50 @@ class DevelopmentalAgent:
             "genome": {
                 "agent_name": self.genome.agent_name,
                 "purpose": self.genome.purpose,
-                "initial_nodes": self.genome.initial_nodes,
-                "fitness_metrics": self.genome.fitness_metrics,
-                "metadata": self.genome.metadata,
+                "initial_nodes": list(self.genome.initial_nodes),
+                "fitness_metrics": list(self.genome.fitness_metrics),
+                "growth_rules": asdict(self.genome.growth_rules),
+                "safety_axioms": asdict(self.genome.safety_axioms),
+                "metadata": dict(self.genome.metadata),
             },
             "graph": self.graph.to_dict(),
             "ledger": self.ledger.to_list(),
         }
+
+    @classmethod
+    def from_state_dict(cls, state: dict) -> "DevelopmentalAgent":
+        """Restore a fully-evolved agent from a `to_dict()` snapshot.
+
+        Round-trips: genome (including growth_rules + safety_axioms),
+        graph topology + edge/node statistics, and the developmental ledger.
+        """
+        from .ledger import LedgerEvent
+
+        genome = AgentGenome.from_dict(state["genome"])
+        agent = cls(genome)
+        # Replace the freshly-built graph with the persisted one.
+        agent.graph = CognitiveGraph.from_dict(state["graph"])
+        # Engines hold references to the old graph; rebind them.
+        agent.growth.graph = agent.graph
+        agent.pruning.graph = agent.graph
+        agent.router.graph = agent.graph
+        # Restore ledger history.
+        agent.ledger.events = [
+            LedgerEvent(
+                event_type=event["event_type"],
+                reason=event["reason"],
+                payload=dict(event.get("payload", {})),
+                timestamp=event["timestamp"],
+            )
+            for event in state.get("ledger", [])
+        ]
+        return agent
+
+    @classmethod
+    def load_state(cls, path: str | Path) -> "DevelopmentalAgent":
+        """Load an agent state JSON written by `save_state`."""
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
+        return cls.from_state_dict(data)
 
     def save_state(self, path: str | Path) -> None:
         path = Path(path)

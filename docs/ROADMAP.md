@@ -13,6 +13,8 @@
 
 ## Phase 2: Agent runtime
 
+- [x] MCP runtime layer (stdio multi-agent registry with file persistence)
+
 - Connect an LLM provider behind a model-router abstraction
 - Add task queues
 - Add durable PostgreSQL storage
