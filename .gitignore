@@ -17,3 +17,7 @@ htmlcov/
 .idea/
 .vscode/
 *.swp
+
+# Private strategy / internal-only docs (never commit)
+STRATEGY.md
+docs/internal/
