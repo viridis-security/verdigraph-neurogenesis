@@ -19,6 +19,8 @@ import { makeEvaluationResult } from "../verdigraph/evaluation";
 import { DevelopmentalAgent } from "../verdigraph/agent";
 import { CallerRegistry } from "../verdigraph/registry";
 import { meteredCall } from "./metering";
+import { getBalanceUsdMicros, microsToUsdString } from "../billing/credits";
+import { createTopupSession } from "../billing/checkout";
 import type { Env } from "../index";
 
 interface AuthCtx extends Record<string, unknown> {
@@ -104,6 +106,25 @@ export class VerdigraphAgent extends McpAgent<Env, unknown, AuthCtx> {
           });
         },
       );
+    };
+
+    // Free tools — bypass the metered debit path entirely, but still return the
+    // standard envelope so MCP clients can treat them uniformly. Used for balance
+    // checks and topup-session creation (we never charge a caller for asking how
+    // to give us money).
+    const freeTool = <S extends ZodRawShape>(
+      name: string,
+      schema: S,
+      body: (args: z.objectOutputType<S, z.ZodTypeAny>) => Promise<unknown>,
+    ) => {
+      (this.server.tool as any)(name, schema as any, async (args: any) => {
+        try {
+          const result = await body(args);
+          return textResult({ ok: true, replayed: false, metering: null, result });
+        } catch (err) {
+          return textResult({ ok: false, replayed: false, metering: null, result: { error: (err as Error).message } });
+        }
+      });
     };
 
     // ── 1. verdigraph_choose_compute_profile ────────────────────────────
@@ -289,6 +310,36 @@ export class VerdigraphAgent extends McpAgent<Env, unknown, AuthCtx> {
       async (args) => ({
         should_escalate: shouldEscalate(args.current_confidence, args.task_risk, args.min_confidence),
       }),
+    );
+
+    // ── 15. verdigraph_get_balance (free — caller asks own balance) ─────
+    freeTool(
+      "verdigraph_get_balance",
+      {},
+      async () => {
+        const micros = await getBalanceUsdMicros(env, callerId);
+        return {
+          caller_id:           callerId,
+          balance_usd_micros:  micros,
+          balance_usd:         microsToUsdString(micros),
+        };
+      },
+    );
+
+    // ── 16. verdigraph_create_topup_session (free — caller adds funds) ──
+    freeTool(
+      "verdigraph_create_topup_session",
+      {
+        amount_usd:  z.number().min(5).max(500).describe("Topup amount in USD ($5 min, $500 max)."),
+        success_url: z.string().url().optional().describe("Where to redirect after successful payment."),
+        cancel_url:  z.string().url().optional().describe("Where to redirect on cancellation."),
+      },
+      async (args) => {
+        const req: import("../billing/checkout").TopupRequest = { callerId, amountUsd: args.amount_usd };
+        if (args.success_url) req.successUrl = args.success_url;
+        if (args.cancel_url)  req.cancelUrl  = args.cancel_url;
+        return createTopupSession(env, req);
+      },
     );
   }
 }
