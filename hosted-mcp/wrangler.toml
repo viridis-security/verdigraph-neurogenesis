@@ -1,0 +1,51 @@
+# wrangler.toml — verdigraph-mcp hosted on Cloudflare Workers
+# Public, paid, OAuth-authenticated MCP server for agent-to-agent compute routing.
+
+name = "verdigraph-mcp"
+main = "src/index.ts"
+compatibility_date = "2026-05-01"
+compatibility_flags = ["nodejs_compat"]
+
+# ─── D1: ledger, callers, conservation payouts (WNAM) ────────────────────
+[[d1_databases]]
+binding       = "DB"
+database_name = "verdigraph-ledger"
+database_id   = "9b81887e-6e85-4797-b977-87f151a56f75"
+
+# ─── R2: genome + agent-state snapshots (ENAM) ───────────────────────────
+[[r2_buckets]]
+binding     = "STATE_BUCKET"
+bucket_name = "verdigraph-state"
+
+# ─── KV: OAuth state, refresh tokens, dynamic client registrations ───────
+[[kv_namespaces]]
+binding = "OAUTH_KV"
+id      = "f92ff2e0511d4cb28226eedc90fa4bcb"   # viridis-token-vault
+
+# ─── Durable Objects: per-caller agent state (registry, graph, ledger) ───
+[durable_objects]
+bindings = [
+  { name = "VERDIGRAPH_AGENT", class_name = "VerdigraphAgent" },
+]
+
+[[migrations]]
+tag         = "v1"
+new_classes = ["VerdigraphAgent"]
+
+# ─── Scheduled triggers ──────────────────────────────────────────────────
+# Monthly conservation payout — 00:00 UTC on the 1st of every month.
+[triggers]
+crons = ["0 0 1 * *"]
+
+# ─── Secrets (set via `wrangler secret put <NAME>`) ──────────────────────
+# STRIPE_SECRET_KEY        — Stripe restricted-key (write usage records, create invoices)
+# STRIPE_WEBHOOK_SECRET    — verifies inbound webhooks
+# ANTHROPIC_API_KEY        — for routed Haiku/Sonnet calls when compute_optimizer picks them
+# CONSERVATION_RECIPIENT   — Stripe Connect account id for the Viridis conservation fund
+# STRIPE_METER_EVENT_NAME  — optional override for the Stripe meter name (default: verdigraph_calls)
+
+[vars]
+ENVIRONMENT             = "production"
+ROUTING_FEE_USD_MICROS  = "2000"   # $0.002 flat per call (tunable)
+CONSERVATION_RATIO_NUM  = "1"
+CONSERVATION_RATIO_DEN  = "4"      # 25% of net revenue
