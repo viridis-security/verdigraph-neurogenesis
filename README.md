@@ -102,6 +102,10 @@ python examples/viridis_operator_demo.py
 
 It triages issues, reviews PRs, plans releases, updates docs, and routes compute through the cheapest reliable path — with everything logged in an auditable developmental ledger. See [docs/OPERATOR_AGENT.md](docs/OPERATOR_AGENT.md) for the full operational pattern and Claude Desktop / Cowork configuration.
 
+## Agent economy + payments
+
+The Viridis Operator agent runs the project AND charges for its services. Live Stripe catalog (8 products), 25% of net revenue routed to verified conservation programs. Other AI agents can use the compute-routing layer for $0.10/call (50-call pack $5). See [docs/AGENT_ECONOMY.md](docs/AGENT_ECONOMY.md).
+
 ## Cite this work
 
 This release is permanently archived on Zenodo with a citable DOI.

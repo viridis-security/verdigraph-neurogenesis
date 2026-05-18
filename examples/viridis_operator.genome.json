@@ -1,6 +1,6 @@
 {
   "agent_name": "Viridis Operator",
-  "purpose": "Operate the Verdigraph NeuroGenesis project on behalf of Viridis LLC. Triage incoming GitHub issues, review pull requests, plan releases, keep documentation current, run the test suite on proposed changes, route compute decisions through the cheapest reliable path, and maintain an auditable developmental ledger of every action taken. The agent operates the framework on which it itself runs — Verdigraph operating Verdigraph.",
+  "purpose": "Operate the Verdigraph NeuroGenesis project on behalf of Viridis LLC. Triage incoming GitHub issues, review pull requests, plan releases, keep documentation current, run the test suite on proposed changes, route compute decisions through the cheapest reliable path, and maintain an auditable developmental ledger of every action taken. Operate the Stripe-backed agent-economy layer: charge other agents for compute-routing services, issue invoices for reports/kits/certifications, reconcile payments, and route a committed 25% of net revenue to verified Viridis conservation programs. The agent operates the framework on which it itself runs — Verdigraph operating Verdigraph — and pays for its own existence through the services it provides.",
   "initial_nodes": [
     "intent_classifier",
     "issue_triage",
@@ -11,6 +11,11 @@
     "github_router",
     "verdigraph_router",
     "compute_optimizer",
+    "billing_router",
+    "payment_processor",
+    "usage_meter",
+    "agent_to_agent_billing",
+    "conservation_fund_router",
     "safety_checker",
     "evaluation_engine",
     "ledger"
@@ -20,8 +25,8 @@
     "strengthen_edge_on_success": 0.07,
     "weaken_edge_on_failure": 0.05,
     "prune_below_weight": 0.12,
-    "max_nodes": 64,
-    "max_edges": 256,
+    "max_nodes": 96,
+    "max_edges": 384,
     "min_events_before_pruning": 4,
     "max_weight": 1.0,
     "min_weight": 0.0
@@ -32,12 +37,19 @@
     "response_time",
     "compute_efficiency",
     "safety_score",
-    "documentation_freshness"
+    "documentation_freshness",
+    "revenue_collected",
+    "conservation_routed",
+    "agent_to_agent_call_count",
+    "audit_completeness"
   ],
   "safety_axioms": {
     "protected_nodes": [
       "github_router",
       "verdigraph_router",
+      "billing_router",
+      "payment_processor",
+      "conservation_fund_router",
       "safety_checker",
       "evaluation_engine",
       "ledger"
@@ -50,21 +62,39 @@
     "custom": {
       "require_human_review_for_release": true,
       "require_human_review_for_destructive_github_action": true,
+      "require_human_review_for_refund_above_usd": 5000,
       "require_test_suite_green_before_merge_review": true,
       "max_outbound_github_writes_per_hour": 30,
-      "compute_quality_floor": 0.70
+      "max_outbound_payment_writes_per_hour": 60,
+      "compute_quality_floor": 0.70,
+      "conservation_share_pct": 25,
+      "conservation_share_target_account": "Viridis LLC Conservation Fund — Stripe payouts batched monthly to designated verified-impact programs",
+      "no_agent_initiated_money_movement": "The agent may CREATE invoices, payment links, and customer records. The agent MUST NOT initiate payouts, transfers, refunds above the threshold, or any movement of funds out of the Stripe balance. All money movement is human-gated."
     }
   },
   "metadata": {
-    "version": "0.1.0",
+    "version": "0.2.0",
     "domain": "verdigraph-project-operations",
     "operator_of": "verdigraph-neurogenesis",
     "operator_for": "Viridis LLC",
     "connected_mcps": [
-      "verdigraph-mcp (stdio, axiomgraph_neurogenesis)",
-      "github-mcp (github/github-mcp-server, configured separately)"
+      "verdigraph-mcp (stdio, in-repo)",
+      "github-mcp (github/github-mcp-server, externally configured)",
+      "stripe-mcp (Stripe Agent Toolkit MCP, externally configured)",
+      "scheduled-tasks-mcp (for self-scheduled work)"
     ],
-    "deploys_via": "Claude Desktop / Cowork / Claude Code with both MCPs connected",
-    "thermodynamic_alignment": "Operator decisions are scored by Cognitive Efficiency = Task Success / Compute Cost per Verdigraph Paper 3 and Intelligence Bound (Hart, in submission)."
+    "stripe_account": "ViridisNorth (acct_1BLyFZDTpwaqE8Ss)",
+    "stripe_catalog": {
+      "compute_routing_pay_per_call": "prod_UXHRSsASuQSfHo / price_1TYCvvDTpwaqE8SsIg5HgqEv ($0.10 per call, 50-call pack $5)",
+      "hosted_mcp_starter": "prod_UXHVdnS8c1jEiV / price_1TYCwdDTpwaqE8SsTJOBHpPg ($99/mo)",
+      "hosted_mcp_team": "prod_UXHV67l3bMkLZC / price_1TYCxSDTpwaqE8Ss2IwR8Mst ($999/mo)",
+      "report_standard": "prod_UXHWJ06822wlj7 / price_1TYCyEDTpwaqE8Ss2kBE4MBs ($5,000 one-time)",
+      "report_enterprise": "prod_UXHXlGr2COKnqD / price_1TYCyoDTpwaqE8SsA0xPMjeZ ($25,000 one-time)",
+      "conservation_kit": "prod_UXHYXMyPxvt5VJ / price_1TYCzTDTpwaqE8Ssak5TYyRP ($5,000 one-time)",
+      "operator_certification_initial": "prod_UXHZf9uoSRCdWK / price_1TYD0ODTpwaqE8Ss4H6j3MlG ($5,000 one-time)",
+      "operator_certification_renewal": "prod_UXHZF8dTtMh0Wt / price_1TYD1DDTpwaqE8SsYAmTF4uh ($2,000/yr)"
+    },
+    "deploys_via": "Claude Desktop / Cowork / Claude Code with verdigraph-mcp + github-mcp + stripe-mcp + scheduled-tasks-mcp connected",
+    "thermodynamic_alignment": "Operator decisions are scored by Cognitive Efficiency = Task Success / Compute Cost per Verdigraph Paper 3 and Intelligence Bound (Hart, in submission). Pricing decisions are scored by Mission-Adjusted Revenue = (Revenue × 0.75) + (Conservation_Routed × 1.5), preferring revenue paths that also fund conservation."
   }
 }

@@ -153,6 +153,28 @@ SYNTHETIC_WORKLOAD = [
         0.94,
         ["intent_classifier", "issue_triage", "github_router", "ledger"],
     ),
+    # ----- Payment / agent-economy workload -----
+    (
+        "agent-call-batch-2026-05-17",
+        "agent_to_agent_billing",
+        TaskProfile(id="t8", task_type="agent_to_agent_billing", difficulty=0.30, risk=0.15, min_quality=0.70, expected_input_tokens=400, expected_output_tokens=200),
+        0.96,
+        ["intent_classifier", "usage_meter", "agent_to_agent_billing", "billing_router", "payment_processor", "ledger"],
+    ),
+    (
+        "invoice-acme-corp-report-q2",
+        "billing_router",
+        TaskProfile(id="t9", task_type="billing_router", difficulty=0.50, risk=0.30, min_quality=0.80, expected_input_tokens=1500, expected_output_tokens=600),
+        0.89,
+        ["intent_classifier", "billing_router", "payment_processor", "safety_checker", "ledger"],
+    ),
+    (
+        "conservation-fund-monthly-route",
+        "conservation_fund_router",
+        TaskProfile(id="t10", task_type="conservation_fund_router", difficulty=0.40, risk=0.20, min_quality=0.85, expected_input_tokens=800, expected_output_tokens=400),
+        0.97,
+        ["intent_classifier", "payment_processor", "conservation_fund_router", "evaluation_engine", "ledger"],
+    ),
 ]
 
 
