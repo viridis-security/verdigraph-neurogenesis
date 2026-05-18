@@ -55,7 +55,7 @@ export class VerdigraphAgent extends McpAgent<Env, unknown, AuthCtx> {
 
   private registry(): CallerRegistry {
     return new CallerRegistry({
-      callerId: this.props.callerId,
+      callerId: this.props!.callerId,
       bucket:   this.env.STATE_BUCKET,
       inMemory: this.inMemory,
       tombstones: this.tombstones,
@@ -64,7 +64,7 @@ export class VerdigraphAgent extends McpAgent<Env, unknown, AuthCtx> {
 
   async init() {
     const env = this.env;
-    const callerId = this.props.callerId;
+    const callerId = this.props!.callerId;
     const reg = () => this.registry();
 
     // Helper to wrap a tool body in meteredCall and return MCP text content.

@@ -28,8 +28,9 @@ export interface Env {
 
 export { VerdigraphAgent };
 
-// McpAgent.mount returns a { fetch } handler that proxies SSE traffic to the DO.
-const mcpApiHandler = (VerdigraphAgent as any).mount("/mcp", { binding: "VERDIGRAPH_AGENT" });
+// McpAgent.serve returns a { fetch } handler. transport: "auto" accepts both
+// Streamable HTTP (modern clients, MCP Inspector) and legacy SSE.
+const mcpApiHandler = (VerdigraphAgent as any).serve("/mcp", { binding: "VERDIGRAPH_AGENT", transport: "auto" });
 
 const oauthProvider = new OAuthProvider({
   apiRoute:                   "/mcp",
