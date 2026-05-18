@@ -30,7 +30,7 @@ bindings = [
 
 [[migrations]]
 tag         = "v1"
-new_classes = ["VerdigraphAgent"]
+new_sqlite_classes = ["VerdigraphAgent"]
 
 # ─── Scheduled triggers ──────────────────────────────────────────────────
 # Monthly conservation payout — 00:00 UTC on the 1st of every month.
