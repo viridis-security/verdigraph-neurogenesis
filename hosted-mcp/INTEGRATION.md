@@ -97,6 +97,8 @@ original ledger row without re-executing the body or re-billing.
 | `verdigraph_delete_agent` | `agent_id`, `request_id` | Soft-delete confirmation |
 | `verdigraph_should_use_cache` | `cache_confidence`, `task_risk`, `threshold` | bool |
 | `verdigraph_should_escalate` | `current_confidence`, `task_risk`, `min_confidence` | bool |
+| `verdigraph_get_balance` | — | Current credit balance in micro-USD, free of charge |
+| `verdigraph_create_topup_session` | `amount_usd` ($5–$500), optional `success_url`/`cancel_url` | Stripe Checkout `checkout_url` for the caller to pay |
 
 Per-caller isolation is structural: agents created under one OAuth grant are
 invisible to any other caller. A caller never sees another caller's ledger rows
@@ -183,7 +185,48 @@ cached ledger row (no re-execution, no new charge).
 
 ---
 
-## 5. Billing
+## 5. Prepaid credits — the actual payment flow
+
+Verdigraph is **prepaid**. Callers deposit credits via Stripe Checkout; each tool
+call deducts from the balance; calls return `INSUFFICIENT_CREDITS` when the
+balance is too low. No surprise invoices, no subscription, no card on file
+required at signup time.
+
+**Topup flow for a new caller:**
+
+1. Caller authenticates via OAuth as usual.
+2. Caller invokes `verdigraph_create_topup_session` with an `amount_usd` between $5 and $500.
+3. Worker returns a `checkout_url` pointing at `https://checkout.stripe.com/...`.
+4. Caller opens that URL in a browser (or directs their user to it) and pays with card / Apple Pay / Google Pay / Link.
+5. On payment success, Stripe fires `checkout.session.completed` to `/stripe/webhook`. The Worker idempotently credits the caller's `credit_balances` row.
+6. Subsequent tool calls debit from the balance. `verdigraph_get_balance` returns the current micro-USD figure at any time, free of charge.
+
+**Insufficient-credits response shape** (success=false, no charge taken):
+
+```json
+{
+  "ok": false,
+  "replayed": false,
+  "metering": {
+    "ledger_id": "usg_01...",
+    "success": false,
+    "error_code": "INSUFFICIENT_CREDITS",
+    "total_charged_usd_micros": 0
+  },
+  "result": {
+    "error": "Insufficient credits for caller cal_...: balance 0 μUSD, required 2000 μUSD. Call verdigraph_create_topup_session to add funds.",
+    "balance_usd_micros": 0,
+    "required_usd_micros": 2000,
+    "remedy": "Call verdigraph_create_topup_session to add credits."
+  }
+}
+```
+
+The ledger row is written (audit trail preserved) but `total_charged_usd_micros = 0`
+and no Stripe meter event fires. The caller can replay with the same `request_id`
+after topping up and the call will execute normally — replay semantics still hold.
+
+## 6. Billing
 
 **Per call:** `total_charged = routing_fee + model_passthrough_cost`. Routing
 fee defaults to `$0.002` ($2,000 micro-USD). Model passthrough is whatever the
@@ -202,7 +245,7 @@ in `metering`. You can reconcile to your Stripe invoice by summing
 
 ---
 
-## 6. Conservation routing
+## 7. Conservation routing
 
 On the 1st of every month at 00:00 UTC, a Workers Cron Trigger aggregates the
 prior month's `success=1` rows, computes:
@@ -226,7 +269,7 @@ end-to-end auditability.
 
 ---
 
-## 7. Internal portfolio agents (HDFM / Sentinel / OpenClaw / Energy AI)
+## 8. Internal portfolio agents (HDFM / Sentinel / OpenClaw / Energy AI)
 
 If you're calling Verdigraph from one of Viridis's own agents and don't want to
 self-bill, prefer the local stdio path:
@@ -242,7 +285,7 @@ billing layer differs.
 
 ---
 
-## 8. Troubleshooting
+## 9. Troubleshooting
 
 | Symptom | Likely cause | Fix |
 |---------|--------------|-----|
@@ -257,7 +300,7 @@ For anything else, the `usage_ledger` row id is in every response's
 
 ---
 
-## 9. Reference
+## 10. Reference
 
 - Repo: https://github.com/viridis-security/verdigraph-neurogenesis
 - Hosted MCP code: `hosted-mcp/`

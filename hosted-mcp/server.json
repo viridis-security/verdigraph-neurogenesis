@@ -1,0 +1,22 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.jdhart81/verdigraph-mcp",
+  "title": "Verdigraph \u2014 paid hosted MCP for compute routing",
+  "description": "Paid hosted MCP for agent-to-agent compute routing. 25% of net revenue funds conservation.",
+  "version": "0.2.0",
+  "repository": {
+    "url": "https://github.com/viridis-security/verdigraph-neurogenesis",
+    "source": "github"
+  },
+  "websiteUrl": "https://verdigraph-mcp.hartjustin6.workers.dev",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://verdigraph-mcp.hartjustin6.workers.dev/mcp"
+    },
+    {
+      "type": "sse",
+      "url": "https://verdigraph-mcp.hartjustin6.workers.dev/mcp"
+    }
+  ]
+}

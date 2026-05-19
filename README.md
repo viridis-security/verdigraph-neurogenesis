@@ -6,6 +6,56 @@ A software-first framework for AI-agent-architected, self-evolving cognitive sub
 
 Verdigraph models an AI agent as a living graph of cognitive nodes and weighted synaptic edges. The graph can grow new modules, strengthen useful pathways, prune weak pathways, log all developmental changes, preserve safety invariants, and optimize compute by learning the cheapest reliable cognitive route for each task. This repository is a GitHub-ready starter kit for experimenting with the concept in a purely digital environment before any physical neuromorphic hardware is attempted.
 
+---
+
+## 🤖 For autonomous agents — Verdigraph runs as a paid hosted MCP
+
+[![MCP](https://img.shields.io/badge/MCP-hosted-7fd1b9?style=flat-square)](https://verdigraph-mcp.hartjustin6.workers.dev/) [![status](https://img.shields.io/badge/status-live-success?style=flat-square)](https://verdigraph-mcp.hartjustin6.workers.dev/) [![pricing](https://img.shields.io/badge/pricing-pay--per--call-blue?style=flat-square)](https://verdigraph-mcp.hartjustin6.workers.dev/.well-known/mcp) [![conservation](https://img.shields.io/badge/conservation-25%25%20of%20net-0f3d2e?style=flat-square)](https://verdigraph-mcp.hartjustin6.workers.dev/llms.txt)
+
+**Live URL:** `https://verdigraph-mcp.hartjustin6.workers.dev`
+
+Hosted, OAuth 2.1 + PKCE authenticated MCP server. Other autonomous agents (Claude, GPT, custom) can pay per call in USD. **25% of net revenue is committed to verified Viridis conservation programs** (monthly cron, public auditable ledger).
+
+### Add to Claude Desktop (one-click JSON)
+
+```json
+{
+  "mcpServers": {
+    "verdigraph": { "type": "http", "url": "https://verdigraph-mcp.hartjustin6.workers.dev/mcp" }
+  }
+}
+```
+
+### Add to Claude Code
+
+```bash
+claude mcp add --transport http verdigraph https://verdigraph-mcp.hartjustin6.workers.dev/mcp
+```
+
+### Discovery surfaces (for bots and registries)
+
+| Endpoint | Purpose |
+|---|---|
+| [`/`](https://verdigraph-mcp.hartjustin6.workers.dev/) | Public landing page with Schema.org + OpenGraph metadata |
+| [`/.well-known/mcp`](https://verdigraph-mcp.hartjustin6.workers.dev/.well-known/mcp) | SEP-1960 manifest (transports, capabilities, auth, pricing, security) |
+| [`/.well-known/mcp/server-card.json`](https://verdigraph-mcp.hartjustin6.workers.dev/.well-known/mcp/server-card.json) | SEP-1649 server card (tools, install blocks, vendor) |
+| [`/llms.txt`](https://verdigraph-mcp.hartjustin6.workers.dev/llms.txt) | [llmstxt.org](https://llmstxt.org) summary for crawling agents |
+| [`/.well-known/oauth-authorization-server`](https://verdigraph-mcp.hartjustin6.workers.dev/.well-known/oauth-authorization-server) | OAuth 2.1 metadata for dynamic client registration |
+| [`/sitemap.xml`](https://verdigraph-mcp.hartjustin6.workers.dev/sitemap.xml) | Search-engine sitemap |
+
+### Pricing
+
+- Top-ups: **$5–$500** per Stripe Checkout session (USD, livemode).
+- Per-call routing fee: **$0.002** + model passthrough at provider rates.
+- Insufficient credits returns `INSUFFICIENT_CREDITS` with no charge taken.
+
+### Tools (16)
+
+14 metered + 2 free billing tools. See the [server card](https://verdigraph-mcp.hartjustin6.workers.dev/.well-known/mcp/server-card.json) for full names, summaries, and metered flags.
+
+---
+
+
 ## Core idea
 
 Instead of treating an AI agent as a static prompt + tool list, Verdigraph treats it as a developmental system:
@@ -118,6 +168,21 @@ This release is permanently archived on Zenodo with a citable DOI.
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). New work must preserve the design invariants in [docs/INVARIANTS.md](docs/INVARIANTS.md) and include tests.
+
+## Discoverability for the bot community
+
+Verdigraph is listed in (or being submitted to) the following MCP registries:
+
+- [Official MCP Registry](https://registry.modelcontextprotocol.io/) — canonical, Anthropic-maintained
+- [GitHub MCP Registry](https://github.com/marketplace?type=mcp) — fastest discovery surface inside GitHub
+- [Smithery](https://smithery.ai/) — `smithery mcp publish` CLI
+- [mcp.so](https://mcp.so/) — community directory
+- [PulseMCP](https://www.pulsemcp.com/) — server directory
+- [Glama](https://glama.ai/) — auto-indexes open-source MCP servers from GitHub
+- [MCP.Directory](https://mcp.directory/) — 24h publication
+
+GitHub topics for this repo (please apply via Settings → Topics if not already present):
+`mcp`, `mcp-server`, `hosted-mcp`, `claude`, `claude-mcp`, `agent-economy`, `agent-to-agent`, `compute-routing`, `metered-api`, `stripe`, `oauth2`, `cloudflare-workers`, `conservation`, `developmental-ai`, `neuromorphic`.
 
 ## Disclaimer
 

@@ -5,6 +5,8 @@ import type { OAuthHelpers } from "@cloudflare/workers-oauth-provider";
 import { authHandler }     from "./auth/handler";
 import { VerdigraphAgent } from "./mcp/agent";
 import { runMonthlyConservationCron } from "./billing/conservation";
+import { tryHandleDiscovery } from "./discovery/handlers";
+import { handleConservationPublic, handleConservationBadge } from "./discovery/conservation";
 
 export interface Env {
   DB:                D1Database;
@@ -44,10 +46,27 @@ const oauthProvider = new OAuthProvider({
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
+
+    // Stripe webhook bypasses OAuth and discovery — signature-verified inside the handler.
     if (url.pathname === "/stripe/webhook") {
       const { handleStripeWebhook } = await import("./billing/webhook");
       return handleStripeWebhook(request, env);
     }
+
+    // Public conservation transparency endpoints — read-only D1 aggregates, no OAuth.
+    if (url.pathname === "/conservation/public" && (request.method === "GET" || request.method === "HEAD")) {
+      return handleConservationPublic(env);
+    }
+    if (url.pathname === "/conservation/badge.svg" && (request.method === "GET" || request.method === "HEAD")) {
+      return handleConservationBadge(env);
+    }
+
+    // Public discovery surfaces (landing, /.well-known/mcp, /llms.txt, etc.).
+    // These short-circuit before OAuth and require no authentication.
+    const discoveryResponse = tryHandleDiscovery(request);
+    if (discoveryResponse) return discoveryResponse;
+
+    // Everything else (OAuth flow + /mcp tool calls) goes through the OAuth provider.
     return (oauthProvider as any).fetch(request, env, ctx);
   },
 
