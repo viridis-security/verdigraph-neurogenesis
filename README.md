@@ -3,7 +3,7 @@
 > Clone this repo, run one script, and within 60 seconds you're building **deterministic, content-addressed brain artifacts** from any agent file — Claude project export, OpenAI Assistant config, raw prompt list, or Verdigraph genome JSON. Pure Python core; zero external services required.
 
 [![python](https://img.shields.io/badge/python-3.10+-blue?style=flat-square)](https://www.python.org)
-[![tests](https://img.shields.io/badge/tests-145%20passing-success?style=flat-square)](#tests)
+[![tests](https://img.shields.io/badge/tests-python%20%C2%B7%20typescript-success?style=flat-square)](#run-the-tests)
 [![license](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20261687.svg)](https://doi.org/10.5281/zenodo.20261687)
 
@@ -175,11 +175,28 @@ A live reference deployment runs at [https://verdigraph.dev](https://verdigraph.
 
 ## Run the tests
 
+Python core:
+
 ```bash
 source .venv/bin/activate
 pip install -e ".[dev]"
 pytest -q
 ```
+
+TypeScript hosted-MCP (Cloudflare Worker):
+
+```bash
+cd hosted-mcp
+npm ci
+npm run typecheck
+npm test
+```
+
+Both suites run in CI (`.github/workflows/tests.yml`) on every push and pull
+request: the Python job across 3.10 / 3.11 / 3.12, and the hosted-mcp job on
+Node 22 — where the cross-core `parity.test.ts` executes against a real Python
+install rather than self-skipping. A secret-scan job fails the build if a live
+Stripe identifier is ever committed.
 
 The `tests/test_brain_parity.py` suite locks the deterministic-build contract — specifically that `b'{"agent_name":"x","purpose":"y","initial_nodes":["a"],"fitness_metrics":["task_success_rate"]}'` produces `brain_id == "RMX124YY916WP0TCSEHFYX7M30"` and `content_hash == "20b9e5be0e5a0d34e564df6d0a554b1232ff9cc3ff309ab8da77a97756602c0c"`. If either side ever drifts, that test fails on the next CI run and we ship the divergence as a deliberate schema bump.
 

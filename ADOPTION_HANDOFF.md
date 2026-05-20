@@ -47,7 +47,7 @@ HN Show is the single highest-leverage move. Drafts ready for all 6 channels.
 
 ### 4. (Optional) Republish under viridis-security org namespace
 Your org membership is now public (I flipped it). To republish:
-  cd ~/Desktop/Cowork\ /axiomgraph_neurogenesis/hosted-mcp
+  cd path/to/verdigraph-neurogenesis/hosted-mcp
   ~/.local/bin/mcp-publisher logout
   ~/.local/bin/mcp-publisher login github   # one more device-code dance
   # Then edit server.json: change name to io.github.viridis-security/verdigraph-mcp

@@ -6,6 +6,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.0] — unreleased (iteration 4: security & production hardening)
+
+Hardening pass to make the paid hosted MCP (`hosted-mcp/`) safe for the Energy
+AI production cutover. **Phase 0 — cutover blockers** (this entry grows as
+phases 1 and 2 land).
+
+### Security
+
+- **Real authentication (C1).** The `/authorize` flow is now gated by GitHub
+  OIDC. Identity is the immutable numeric GitHub user id
+  (`oauth_subject = "github:" + id`, `UNIQUE`); two authorizations by the same
+  human resolve to the same `caller_id`, so a caller who loses a token recovers
+  their balance by re-authenticating. Previously every authorization minted a
+  fresh random subject and a brand-new empty account. New routes:
+  `GET /authorize` (redirect to GitHub), `GET /authorize/callback` (code
+  exchange + consent). New Worker secrets `GITHUB_OAUTH_CLIENT_ID` /
+  `GITHUB_OAUTH_CLIENT_SECRET`.
+- **Operational docs purged from the public repo (C2).**
+  `STRIPE_GO_LIVE_STATE.md`, `STRIPE_GO_LIVE_CHECKLIST.md` and
+  `operator-digests/` moved to the git-ignored `docs/internal/`. Live Stripe
+  object ids, the Stripe account id, and absolute local filesystem paths
+  scrubbed from all remaining tracked files. A CI `secret-scan` job now fails
+  the build on any committed live identifier.
+
+### Fixed
+
+- **Exactly-once metering under concurrency (H1).** `meteredCall` reserves the
+  `usage_ledger` row on the `UNIQUE (caller_id, request_id)` index *before*
+  debiting, so concurrent or retried calls debit exactly once, fire exactly one
+  Stripe meter event, and replay the original row. Closes a TOCTOU race where
+  two concurrent calls sharing a `request_id` both debited.
+- **Conservation cron counts all revenue streams (H2).** The monthly payout now
+  sums net revenue across per-call routing fees, brain unlocks, attestations
+  *and* marketplace sales — not routing fees alone. Marketplace conservation
+  ledger rows are linked to the payout that accounts for them.
+- **Atomic money paths (H3).** `redeemCreditCode`, `bookPurchase`, and the
+  subscription-invoice credit path now commit their multi-statement mutations
+  as a single `D1.batch()` transaction — all-or-nothing, no partial state.
+
+### Added
+
+- **TypeScript CI (H4).** A `hosted-mcp` job runs `npm run typecheck` and the
+  full vitest suite (including the cross-core `parity.test.ts`, which now
+  executes against a real Python install) on every push and pull request.
+- A real-SQLite D1 test harness (`hosted-mcp/tests/helpers/d1.ts`) backing the
+  new metering, atomic-money, conservation-cron and auth test suites.
+- D1 migrations `0007_metering_settlement.sql` (usage_ledger `settlement_state`)
+  and `0008_conservation_multistream.sql` (link marketplace conservation rows
+  to payouts).
+
 ## [0.1.0] — 2026-05-17
 
 **Permanent archive (Zenodo):**
@@ -54,4 +104,5 @@ plus the Phase 2 MCP runtime layer.
   reconstruct evolved agents from persisted state.
 
 [Unreleased]: https://github.com/viridis-security/verdigraph-neurogenesis/compare/v0.1.0...HEAD
+[0.3.0]: https://github.com/viridis-security/verdigraph-neurogenesis/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/viridis-security/verdigraph-neurogenesis/releases/tag/v0.1.0

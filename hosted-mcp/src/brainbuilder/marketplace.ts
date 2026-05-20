@@ -316,8 +316,13 @@ export async function bookPurchase(env: Env, args: BookPurchaseArgs): Promise<vo
   const now = Date.now();
   const yyyymm = parseInt(new Date(now).toISOString().slice(0, 7).replace("-", ""), 10);
 
-  // Insert purchase row.
-  await env.DB.prepare(
+  // iter4 H3 — all five writes commit as ONE atomic D1 batch (a single
+  // transaction). Either the purchase row, the creator-balance credit, the
+  // conservation-ledger entry, the buyer unlock, and the listing counter ALL
+  // land, or none do. A crash or DB error mid-sequence can no longer pay a
+  // creator without recording the conservation share, or unlock a brain
+  // without booking the purchase.
+  const purchaseStmt = env.DB.prepare(
     `INSERT INTO marketplace_purchases (purchase_id, listing_id, brain_id, buyer_caller_id, creator_caller_id,
        stripe_session_id, gross_usd_micros, stripe_fee_usd_micros, net_usd_micros,
        creator_share_micros, viridis_share_micros, conservation_share_micros, status, created_at)
@@ -326,32 +331,37 @@ export async function bookPurchase(env: Env, args: BookPurchaseArgs): Promise<vo
     purchase_id, listing.listing_id, listing.brain_id, args.buyerCallerId, listing.creator_caller_id,
     args.stripeSessionId, args.grossUsdMicros, args.stripeFeeMicros, split.net_micros,
     split.creator_share, split.viridis_share, split.conservation_share, now,
-  ).run();
+  );
 
-  // Increment creator balance (upsert).
-  await env.DB.prepare(
+  const creatorBalanceStmt = env.DB.prepare(
     `INSERT INTO marketplace_creator_balances (caller_id, owed_usd_micros, lifetime_paid_usd_micros, updated_at)
        VALUES (?, ?, 0, ?)
        ON CONFLICT(caller_id) DO UPDATE SET owed_usd_micros = owed_usd_micros + excluded.owed_usd_micros, updated_at = excluded.updated_at`
-  ).bind(listing.creator_caller_id, split.creator_share, now).run();
+  ).bind(listing.creator_caller_id, split.creator_share, now);
 
-  // Conservation ledger entry.
-  await env.DB.prepare(
+  const conservationLedgerStmt = env.DB.prepare(
     `INSERT INTO marketplace_conservation_ledger (entry_id, purchase_id, share_usd_micros, period_yyyymm, payout_status, created_at)
        VALUES (?, ?, ?, ?, 'pending', ?)`
-  ).bind(ulid(), purchase_id, split.conservation_share, yyyymm, now).run();
+  ).bind(ulid(), purchase_id, split.conservation_share, yyyymm, now);
 
-  // Unlock for buyer: insert a brain_builds row so isBrainUnlocked treats this purchase
+  // Unlock for buyer: a brain_builds row so isBrainUnlocked treats this purchase
   // identically to single_brain_unlock (M6).
-  await env.DB.prepare(
+  const unlockStmt = env.DB.prepare(
     `INSERT INTO brain_builds (build_id, brain_id, caller_id, product, amount_usd_micros, stripe_session_id, status, created_at)
        VALUES (?, ?, ?, 'single_brain_unlock', ?, ?, 'paid', ?)`
-  ).bind(ulid(), listing.brain_id, args.buyerCallerId, args.grossUsdMicros, args.stripeSessionId, now).run();
+  ).bind(ulid(), listing.brain_id, args.buyerCallerId, args.grossUsdMicros, args.stripeSessionId, now);
 
-  // Bump listing counters.
-  await env.DB.prepare(
+  const listingCounterStmt = env.DB.prepare(
     `UPDATE marketplace_listings SET purchase_count = purchase_count + 1, updated_at = ? WHERE listing_id = ?`
-  ).bind(now, listing.listing_id).run();
+  ).bind(now, listing.listing_id);
+
+  await env.DB.batch([
+    purchaseStmt,
+    creatorBalanceStmt,
+    conservationLedgerStmt,
+    unlockStmt,
+    listingCounterStmt,
+  ]);
 }
 
 // ─── Stripe Checkout for a marketplace purchase ───────────────────────────

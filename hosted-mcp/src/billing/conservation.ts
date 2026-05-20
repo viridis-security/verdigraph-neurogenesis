@@ -3,21 +3,34 @@
 // Wired via wrangler.toml `triggers.crons = ["0 0 1 * *"]` so this runs at
 // 00:00 UTC on the 1st of every month for the *previous* calendar month.
 //
-// Aggregates usage_ledger rows where success=1 in [period_start, period_end),
-// computes net = sum(total_charged - model_cost), conservation share = floor(net/4),
-// inserts a conservation_payouts row with status='pending', then calls
-// stripe.transfers.create to CONSERVATION_RECIPIENT. On success the row flips to
-// 'sent' with stripe_transfer_id; on failure it stays 'pending' for retry.
+// ── iter4 H2: counts ALL revenue streams ───────────────────────────────────
+// Net revenue for a period is the sum of every revenue stream, not routing
+// fees alone:
+//   • usage_ledger           — per-call routing fees (success rows)
+//   • brain_builds (paid)    — brain unlocks AND attestations (same table;
+//                              attestations carry product='attestation')
+//   • marketplace_purchases  — published-brain marketplace sales
+//
+//   net  = (routing gross - routing passthrough)
+//        +  brain_builds revenue
+//        + (marketplace gross - marketplace Stripe fees)
+//   conservation_share = floor(net * CONSERVATION_RATIO_NUM / CONSERVATION_RATIO_DEN)
+//
+// Every marketplace_conservation_ledger row folded into a payout is linked to
+// it via conservation_payout_id, so those rows finally have a consumer.
 //
 // Idempotency: conservation_payouts is indexed on (period_start, period_end);
-// we skip if a non-failed row already exists for the period.
+// a 'sent' row for the period short-circuits the run.
 
 import { ulid } from "ulid";
 import { getStripeClient } from "./stripe";
 import { conservationShareUsdMicros } from "./ledger";
 import type { Env } from "../index";
 
-export async function runMonthlyConservationCron(env: Env): Promise<{
+export async function runMonthlyConservationCron(
+  env: Env,
+  opts?: { now?: number },
+): Promise<{
   status: "skipped" | "sent" | "pending" | "no_revenue";
   payoutId?: string;
   period_start: number;
@@ -27,9 +40,11 @@ export async function runMonthlyConservationCron(env: Env): Promise<{
   stripe_transfer_id?: string;
   error?: string;
 }> {
-  const { periodStart, periodEnd } = previousMonthUtc();
+  const { periodStart, periodEnd } = previousMonthUtc(
+    opts?.now !== undefined ? new Date(opts.now) : new Date(),
+  );
 
-  // Skip if a successful or pending payout already exists for this period.
+  // Skip if a successful payout already exists for this period.
   const existing = await env.DB
     .prepare(
       `SELECT id, status, stripe_transfer_id FROM conservation_payouts
@@ -52,23 +67,58 @@ export async function runMonthlyConservationCron(env: Env): Promise<{
       : base;
   }
 
-  // Aggregate prior-month usage. Only success=1 rows contribute.
-  const agg = await env.DB
+  // ── Aggregate every revenue stream for the period ────────────────────────
+  // Stream 1 — per-call routing fees (success rows only).
+  const routing = await env.DB
     .prepare(
-      `SELECT
-         COALESCE(SUM(total_charged_usd_micros), 0)              AS gross,
-         COALESCE(SUM(model_cost_usd_micros), 0)                 AS passthrough
-       FROM usage_ledger
-       WHERE success = 1
-         AND occurred_at >= ?1
-         AND occurred_at <  ?2`,
+      `SELECT COALESCE(SUM(total_charged_usd_micros), 0) AS gross,
+              COALESCE(SUM(model_cost_usd_micros), 0)    AS passthrough
+         FROM usage_ledger
+        WHERE success = 1 AND occurred_at >= ?1 AND occurred_at < ?2`,
     )
     .bind(periodStart, periodEnd)
     .first<{ gross: number; passthrough: number }>();
 
-  const gross        = agg?.gross ?? 0;
-  const passthrough  = agg?.passthrough ?? 0;
-  const netRevenue   = Math.max(0, gross - passthrough);
+  // Stream 2 — brain unlocks AND attestations (both land in brain_builds).
+  // A marketplace purchase ALSO writes a brain_builds row (an access grant for
+  // the buyer, M6) sharing its stripe_session_id with the marketplace_purchases
+  // row. Those are NOT separate revenue — the sale is counted under Stream 3 —
+  // so they are excluded here to avoid double-counting.
+  const builds = await env.DB
+    .prepare(
+      `SELECT COALESCE(SUM(amount_usd_micros), 0) AS revenue
+         FROM brain_builds
+        WHERE status = 'paid' AND created_at >= ?1 AND created_at < ?2
+          AND ( stripe_session_id IS NULL
+                OR stripe_session_id NOT IN (
+                     SELECT stripe_session_id FROM marketplace_purchases
+                      WHERE stripe_session_id IS NOT NULL ) )`,
+    )
+    .bind(periodStart, periodEnd)
+    .first<{ revenue: number }>();
+
+  // Stream 3 — marketplace sales (gross minus Stripe fees == net).
+  const marketplace = await env.DB
+    .prepare(
+      `SELECT COALESCE(SUM(gross_usd_micros), 0)      AS gross,
+              COALESCE(SUM(stripe_fee_usd_micros), 0) AS fees
+         FROM marketplace_purchases
+        WHERE status = 'paid' AND created_at >= ?1 AND created_at < ?2`,
+    )
+    .bind(periodStart, periodEnd)
+    .first<{ gross: number; fees: number }>();
+
+  const routingGross       = routing?.gross ?? 0;
+  const routingPassthrough = routing?.passthrough ?? 0;
+  const buildsRevenue      = builds?.revenue ?? 0;
+  const marketplaceGross   = marketplace?.gross ?? 0;
+  const marketplaceFees    = marketplace?.fees ?? 0;
+
+  // gross / passthrough / net across all streams. brain_builds revenue has no
+  // passthrough; marketplace passthrough is the Stripe fee.
+  const gross       = routingGross + buildsRevenue + marketplaceGross;
+  const passthrough = routingPassthrough + marketplaceFees;
+  const netRevenue  = Math.max(0, gross - passthrough);
 
   if (netRevenue === 0) {
     return {
@@ -82,7 +132,7 @@ export async function runMonthlyConservationCron(env: Env): Promise<{
 
   const share = conservationShareUsdMicros(env, netRevenue);
   if (share === 0) {
-    // Net revenue below 4 micro-USD — nothing to send.
+    // Net revenue below the ratio denominator — nothing to send yet.
     return {
       status: "no_revenue",
       period_start: periodStart,
@@ -115,11 +165,24 @@ export async function runMonthlyConservationCron(env: Env): Promise<{
         netRevenue,
         share,
         recipient ?? "unconfigured",
-        `auto-cron monthly conservation share floor(net/4) = ${share}`,
+        `auto-cron conservation share floor(net*ratio) = ${share}; ` +
+          `streams: routing+brain_builds+marketplace`,
         now,
       )
       .run();
   }
+
+  // Link every unlinked marketplace_conservation_ledger row in the period to
+  // this payout — they now have a consumer (iter4 H2 point 2).
+  await env.DB
+    .prepare(
+      `UPDATE marketplace_conservation_ledger
+          SET conservation_payout_id = ?1
+        WHERE conservation_payout_id IS NULL
+          AND created_at >= ?2 AND created_at < ?3`,
+    )
+    .bind(payoutId, periodStart, periodEnd)
+    .run();
 
   const stripe = getStripeClient(env);
   if (!stripe || !recipient) {
@@ -134,9 +197,7 @@ export async function runMonthlyConservationCron(env: Env): Promise<{
     };
   }
 
-  // Stripe transfers use integer cents. Floor-divide micros->cents (10_000 micros = 1 cent).
-  // floor(share/10_000) is safe: if share is below 10_000 micros (= $0.01), we have nothing
-  // to transfer and leave the row pending until next month's aggregation rolls forward.
+  // Stripe transfers use integer cents. 10_000 micros = 1 cent.
   const amountCents = Math.floor(share / 10_000);
   if (amountCents <= 0) {
     return {
@@ -164,14 +225,19 @@ export async function runMonthlyConservationCron(env: Env): Promise<{
         conservation_share_usd_micros: String(share),
       },
     });
-    await env.DB
-      .prepare(
-        `UPDATE conservation_payouts
-            SET status = 'sent', stripe_transfer_id = ?1
-          WHERE id = ?2`,
-      )
-      .bind(transfer.id, payoutId)
-      .run();
+    // Flip the payout AND every marketplace ledger row it covers to 'sent'.
+    await env.DB.batch([
+      env.DB
+        .prepare(`UPDATE conservation_payouts SET status = 'sent', stripe_transfer_id = ?1 WHERE id = ?2`)
+        .bind(transfer.id, payoutId),
+      env.DB
+        .prepare(
+          `UPDATE marketplace_conservation_ledger
+              SET payout_status = 'sent', stripe_transfer_id = ?1
+            WHERE conservation_payout_id = ?2 AND payout_status = 'pending'`,
+        )
+        .bind(transfer.id, payoutId),
+    ]);
     return {
       status: "sent",
       payoutId,
@@ -199,11 +265,9 @@ export async function runMonthlyConservationCron(env: Env): Promise<{
 function previousMonthUtc(now: Date = new Date()): { periodStart: number; periodEnd: number } {
   const y = now.getUTCFullYear();
   const m = now.getUTCMonth();
-  // Start of prior month
   const startYear  = m === 0 ? y - 1 : y;
   const startMonth = m === 0 ? 11    : m - 1;
   const periodStart = Date.UTC(startYear, startMonth, 1, 0, 0, 0, 0);
-  // End of prior month == start of current month
   const periodEnd   = Date.UTC(y,         m,           1, 0, 0, 0, 0);
   return { periodStart, periodEnd };
 }

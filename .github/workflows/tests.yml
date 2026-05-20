@@ -2,12 +2,11 @@ name: tests
 
 on:
   push:
-    branches: [main]
   pull_request:
-    branches: [main]
 
 jobs:
-  test:
+  # ── Python core library ───────────────────────────────────────────────
+  python:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -34,3 +33,66 @@ jobs:
         run: |
           python examples/run_demo.py
           python examples/compute_efficiency_demo.py
+
+  # ── TypeScript hosted-MCP (Cloudflare Worker) ─────────────────────────
+  # iter4 H4: vitest + typecheck were previously ungated. This job runs the
+  # full TS suite on every push and PR. Python is also installed here so the
+  # cross-core parity test (tests/parity.test.ts spawns `python3`) actually
+  # executes instead of self-skipping.
+  #
+  # Node 22 is required: the D1 test harness (tests/helpers/d1.ts) uses the
+  # built-in `node:sqlite` module, which is only available on Node >= 22.5.
+  hosted-mcp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Set up Python (for the cross-core parity test)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python package (parity test imports `verdigraph`)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Install hosted-mcp dependencies
+        working-directory: hosted-mcp
+        run: npm ci
+
+      - name: Typecheck
+        working-directory: hosted-mcp
+        run: npm run typecheck
+
+      - name: Test (vitest — includes the cross-core parity test)
+        working-directory: hosted-mcp
+        run: npm test
+
+  # ── Secret scan ───────────────────────────────────────────────────────
+  # iter4 C2: fail the build if a live Stripe object id (or equivalent live
+  # credential) is committed to a tracked file. Length thresholds match real
+  # Stripe ids while ignoring short placeholder forms. This grep gate stands
+  # in for gitleaks, targeted at the exact id families this repo handles. The
+  # search pattern is assembled from fragments at runtime so this workflow
+  # file itself holds no literal id prefix.
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Scan tracked files for leaked live identifiers
+        run: |
+          set -uo pipefail
+          L='live_'
+          PATTERN="(cs_${L}|rk_${L}|sk_${L})[A-Za-z0-9]{8,}|cus_[A-Za-z0-9]{10,}|we_[A-Za-z0-9]{12,}|acct_[A-Za-z0-9]{12,}"
+          if git grep -nE "$PATTERN" -- . ; then
+            echo "::error::Live Stripe object id found in a tracked file. Scrub it — operational docs belong in the git-ignored docs/internal/."
+            exit 1
+          fi
+          echo "secret-scan: clean — no live identifiers in tracked files."

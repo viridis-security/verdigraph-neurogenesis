@@ -220,10 +220,12 @@ async function onAttestationPurchase(env: Env, session: Stripe.Checkout.Session)
   const signed = await attestBrain(env, brain, tier, "0.2.0");
   await saveAttestation(env, signed, callerId, session.id);
 
-  // C7: 25% conservation on attestation revenue flows through the existing
-  // routing-revenue cron via brain_builds with product='attestation' and
-  // status='paid' (the monthly cron tallies gross/net for the period and
-  // computes the 25% share from the aggregate).
+  // Attestation revenue is conservation-counted via brain_builds. As of iter4
+  // H2 the monthly conservation cron sums every brain_builds row with
+  // status='paid' (product='attestation' included) into the period's net
+  // revenue and applies the conservation share to that aggregate. Before iter4
+  // the cron aggregated usage_ledger ONLY, so this row was never counted —
+  // that gap is what iter4 H2 closed.
   const amountMicros = (session.amount_total ?? 0) * 10_000;
   const buildId = (() => {
     const t = Date.now().toString(32).toUpperCase().padStart(10, "0");
@@ -286,11 +288,22 @@ async function onSubscriptionInvoicePaid(env: Env, inv: Stripe.Invoice): Promise
   const row = await env.DB.prepare(`SELECT caller_id, monthly_amount_usd FROM credit_subscriptions WHERE subscription_id = ?`).bind(subscriptionId).first<{ caller_id: string; monthly_amount_usd: number }>();
   if (!row) return;
   const amountMicros = row.monthly_amount_usd * 1_000_000;
-  await creditUsdMicros(env, row.caller_id, amountMicros);
   const now = Date.now();
-  await env.DB.prepare(
+
+  // iter4 H3 — credit the balance AND advance the subscription bookkeeping as
+  // one atomic D1 batch. A crash between the two can no longer credit a caller
+  // without recording the issuance, or record an issuance that never landed.
+  const creditStmt = env.DB.prepare(
+    `INSERT INTO credit_balances (caller_id, balance_usd_micros, updated_at)
+     VALUES (?1, ?2, ?3)
+     ON CONFLICT (caller_id) DO UPDATE SET
+       balance_usd_micros = balance_usd_micros + excluded.balance_usd_micros,
+       updated_at         = excluded.updated_at`
+  ).bind(row.caller_id, amountMicros, now);
+  const subscriptionStmt = env.DB.prepare(
     `UPDATE credit_subscriptions SET total_credits_issued = total_credits_issued + ?, current_period_end = ?, updated_at = ?, status = 'active' WHERE subscription_id = ?`
-  ).bind(amountMicros, (inv.period_end ?? Math.floor(now/1000)) * 1000, now, subscriptionId).run();
+  ).bind(amountMicros, (inv.period_end ?? Math.floor(now / 1000)) * 1000, now, subscriptionId);
+  await env.DB.batch([creditStmt, subscriptionStmt]);
 }
 
 async function onSubscriptionInvoiceFailed(env: Env, inv: Stripe.Invoice): Promise<void> {

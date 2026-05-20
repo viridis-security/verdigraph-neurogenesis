@@ -83,7 +83,7 @@
       "stripe-mcp (Stripe Agent Toolkit MCP, externally configured)",
       "scheduled-tasks-mcp (for self-scheduled work)"
     ],
-    "stripe_account": "ViridisNorth (acct_1BLyFZDTpwaqE8Ss)",
+    "stripe_account": "ViridisNorth",
     "stripe_catalog": {
       "compute_routing_pay_per_call": "prod_UXHRSsASuQSfHo / price_1TYCvvDTpwaqE8SsIg5HgqEv ($0.10 per call, 50-call pack $5)",
       "hosted_mcp_starter": "prod_UXHVdnS8c1jEiV / price_1TYCwdDTpwaqE8SsTJOBHpPg ($99/mo)",

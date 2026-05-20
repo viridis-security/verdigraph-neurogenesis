@@ -98,10 +98,12 @@ re-billing.
 cd hosted-mcp
 npm install
 npx wrangler login                                          # one-time
-npx wrangler secret put STRIPE_SECRET_KEY                   # rk_test_... then rk_live_...
+npx wrangler secret put STRIPE_SECRET_KEY                   # Stripe restricted key (test mode, then live mode)
 npx wrangler secret put STRIPE_WEBHOOK_SECRET
 npx wrangler secret put ANTHROPIC_API_KEY
 npx wrangler secret put CONSERVATION_RECIPIENT              # Stripe Connect account id
+npx wrangler secret put GITHUB_OAUTH_CLIENT_ID              # GitHub OAuth app — Client ID
+npx wrangler secret put GITHUB_OAUTH_CLIENT_SECRET          # GitHub OAuth app — Client secret
 npx wrangler deploy
 ```
 
@@ -119,17 +121,51 @@ After deploy:
 
 Custom domain (recommended once stable): `mcp.verdigraph.ai` via Workers Routes.
 
+## Authentication (GitHub OIDC)
+
+The `/authorize` flow is gated by GitHub sign-in (iter4 C1). Identity is the
+**immutable numeric GitHub user id**: `oauth_subject = "github:" + <id>`, which
+is `UNIQUE` in the `callers` table. Re-authorizing with the same GitHub account
+always resolves to the same `caller_id` — and therefore the same credit
+balance — so a caller who loses an MCP token recovers their account simply by
+signing in again.
+
+Flow: `GET /authorize` stashes the MCP `AuthRequest` in KV under a single-use
+state nonce and redirects to GitHub → `GET /authorize/callback` exchanges the
+code, reads the GitHub user, and renders the consent page → `POST /authorize`
+upserts the caller row (`ON CONFLICT (oauth_subject) DO UPDATE`) and completes
+the OAuth code flow. The `oauth_subject` is derived server-side and never
+round-tripped through the browser.
+
+**[MAINTAINER ACTION]** Register a GitHub OAuth app (GitHub → Settings →
+Developer settings → OAuth Apps) with the Authorization callback URL set to
+`https://<your-worker-origin>/authorize/callback`, then set both Worker
+secrets: `wrangler secret put GITHUB_OAUTH_CLIENT_ID` and
+`wrangler secret put GITHUB_OAUTH_CLIENT_SECRET`. Until both are set,
+`GET /authorize` returns `503`.
+
+### Headless agents
+
+The interactive consent flow is, by design, IdP-gated — it cannot be completed
+without a browser to sign in to GitHub. Fully headless agents are therefore
+out of scope for `/authorize`. The intended path for them is a pre-provisioned
+**API key**, issued out-of-band to an already-authenticated `caller_id` and
+presented as a bearer credential. That API-key path is **not yet implemented**
+and is tracked as a follow-up; until it ships, every funded account must be
+created through the GitHub-gated interactive flow.
+
 ## Invariants (verified by tests/)
 
 1. Money is **integer micro-USD**. No floats touch the ledger.
-2. `(caller_id, request_id)` is **idempotent**. Replay returns the original row, no double-charge, no side effects.
+2. `(caller_id, request_id)` is **exactly-once**. A row is reserved on the UNIQUE index before any debit, so concurrent or retried calls debit once, meter once, and replay the original row (iter4 H1).
 3. Routing fee charged **only on success**. Failures meter `total_charged = 0` but still write a row with `success = 0` and `error_code`.
-4. Conservation share = `floor(net_revenue / 4)`. **Never** rounds — D1 CHECK constraint enforces.
+4. Conservation share = `floor(net_revenue / 4)`, where `net_revenue` spans **every** revenue stream — routing fees, brain unlocks, attestations, marketplace sales (iter4 H2). **Never** rounds — D1 CHECK constraint enforces.
 5. Quality floor = `max(min_quality, risk * 0.8)`. `chooseProfile` never returns a profile below this.
 6. **All tool I/O validated by Zod** at the boundary. Field-for-field parity with Python pydantic schemas in `verdigraph_mcp/server.py`.
 7. **Per-caller isolation**. Per-DO in-memory store + per-caller R2 prefix. No tool can leak another caller's data.
-8. **Append-only ledger**. No UPDATE/DELETE on `usage_ledger` except the dedicated `stripe_usage_event_id` annotation.
+8. **Reserve-then-settle ledger**. A `usage_ledger` row is INSERTed `settlement_state='pending'`, then UPDATEd exactly once to `'settled'` with its final charge (iter4 H1). After settlement the row is immutable except the `stripe_usage_event_id` annotation. No DELETEs.
 9. **No secrets in code or wrangler.toml**. All via `wrangler secret put`.
+10. **Stable identity**. The same GitHub identity always resolves to the same `caller_id`; re-authorizing recovers an existing balance (iter4 C1).
 
 ## Roadmap
 
