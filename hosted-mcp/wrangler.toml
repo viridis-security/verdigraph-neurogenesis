@@ -49,6 +49,8 @@ crons = ["0 0 1 * *"]
 # ANTHROPIC_API_KEY        — for routed Haiku/Sonnet calls when compute_optimizer picks them
 # CONSERVATION_RECIPIENT   — Stripe Connect account id for the Viridis conservation fund
 # STRIPE_METER_EVENT_NAME  — optional override for the Stripe meter name (default: verdigraph_calls)
+# GITHUB_OAUTH_CLIENT_ID     — GitHub OAuth app Client ID  (iter4 C1: IdP-gated /authorize)
+# GITHUB_OAUTH_CLIENT_SECRET — GitHub OAuth app Client secret (pair with the Client ID above)
 
 
 [vars]

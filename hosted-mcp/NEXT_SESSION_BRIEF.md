@@ -13,7 +13,7 @@ collects, 25% of net auto-routes to Viridis conservation programs, the rest is
 revenue for the Verdigraph project. This is what closes the "Verdigraph operating
 Verdigraph and paying for its own existence" loop in the operator genome.
 
-Repository: `~/Desktop/Cowork /axiomgraph_neurogenesis`
+Repository: `path/to/verdigraph-neurogenesis`
 GitHub: `viridis-security/verdigraph-neurogenesis`
 Work directory: `hosted-mcp/`
 Python reference (do not modify): `verdigraph/`, `verdigraph_mcp/`
@@ -204,7 +204,7 @@ row with the returned event id.
 **One-time on Justin's Mac:**
 
 ```bash
-cd ~/Desktop/Cowork\ /axiomgraph_neurogenesis/hosted-mcp
+cd path/to/verdigraph-neurogenesis/hosted-mcp
 npm install
 npx wrangler login
 npx wrangler secret put STRIPE_SECRET_KEY
@@ -275,7 +275,7 @@ npx wrangler deploy
 
 ```bash
 # typecheck
-cd ~/Desktop/Cowork\ /axiomgraph_neurogenesis/hosted-mcp && npx tsc --noEmit
+cd path/to/verdigraph-neurogenesis/hosted-mcp && npx tsc --noEmit
 
 # unit tests
 npm test
@@ -292,7 +292,7 @@ curl -X POST .../mcp -d "$REQ"  # twice
 # expect identical response + a SINGLE row in usage_ledger for that request_id
 
 # local stdio regression
-cd ~/Desktop/Cowork\ /axiomgraph_neurogenesis && .venv/bin/verdigraph-mcp </dev/null
+cd path/to/verdigraph-neurogenesis && .venv/bin/verdigraph-mcp </dev/null
 # expect: starts cleanly, no errors
 ```
 

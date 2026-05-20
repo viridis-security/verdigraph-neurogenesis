@@ -21,6 +21,11 @@ export interface Env {
   STRIPE_WEBHOOK_SECRET?:    string;
   STRIPE_METER_EVENT_NAME?:  string;
   ANTHROPIC_API_KEY?:        string;
+
+  // GitHub OAuth app credentials — power the IdP-gated authorize flow (iter4
+  // C1). Set as Worker secrets via `wrangler secret put`. See wrangler.toml.
+  GITHUB_OAUTH_CLIENT_ID?:      string;
+  GITHUB_OAUTH_CLIENT_SECRET?:  string;
   CONSERVATION_RECIPIENT?:   string;
   ENVIRONMENT:               string;
   ROUTING_FEE_USD_MICROS:    string;

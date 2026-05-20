@@ -7,11 +7,13 @@
 #   - github-mcp      : REMOTE hosted MCP (api.githubcopilot.com, OAuth)
 #
 # Run once on Justin's Mac:
-#   bash ~/Desktop/Cowork\ /axiomgraph_neurogenesis/scripts/setup_cowork_mcps.sh
+#   bash /path/to/verdigraph-neurogenesis/scripts/setup_cowork_mcps.sh
 
 set -euo pipefail
 
-PROJECT_DIR="${HOME}/Desktop/Cowork /axiomgraph_neurogenesis"
+# Resolve the repo root from this script's own location — no hardcoded paths.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 VENV_DIR="${PROJECT_DIR}/.venv"
 STATE_DIR="${PROJECT_DIR}/verdigraph_state"
 CLAUDE_CFG_DIR="${HOME}/Library/Application Support/Claude"

@@ -10,7 +10,6 @@
 //   5. Bot calls verdigraph_redeem_credit_code(code) → atomic claim + credit.
 
 import type { Env } from "../index";
-import { creditUsdMicros } from "./credits";
 
 const ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
 
@@ -65,35 +64,78 @@ export async function mintCreditCode(env: Env, args: {
   throw new Error("credit_code_mint_failed");
 }
 
+// Module-level monotonic redemption clock. Guarantees two redemptions handled
+// by the same isolate receive distinct redeemed_at values, so a same-caller
+// self-race cannot double-credit: the credit statement is gated on the exact
+// redeemed_at written by its sibling claim within the same atomic batch.
+let lastRedeemTs = 0;
+function nextRedeemTs(): number {
+  const now = Date.now();
+  lastRedeemTs = now > lastRedeemTs ? now : lastRedeemTs + 1;
+  return lastRedeemTs;
+}
+
+/**
+ * Redeem a credit code (iter4 H3 — atomic money path).
+ *
+ * The claim (flip code to 'redeemed') and the credit (add to the caller's
+ * balance) run as ONE D1 batch — a single transaction. Either both apply or
+ * neither does, so a crash or DB error mid-sequence can never burn a code
+ * without delivering its credit (or vice versa).
+ *
+ * The credit is an INSERT...SELECT gated on (code, status='redeemed',
+ * redeemed_by_caller, redeemed_at) so it produces a balance row ONLY when this
+ * exact claim landed — a claim that lost a concurrent race yields an empty
+ * SELECT and applies no credit.
+ */
 export async function redeemCreditCode(env: Env, code: string, callerId: string): Promise<{
   redeemed: boolean;
   amount_usd_micros?: number;
   reason?: string;
 }> {
-  // Atomic claim: UPDATE gated on status='pending'. Returns 0 rows if already redeemed.
-  const now = Date.now();
-  const result = await env.DB.prepare(
-    `UPDATE credit_codes
-        SET status = 'redeemed', redeemed_by_caller = ?, redeemed_at = ?
-      WHERE code = ? AND status = 'pending'`
-  ).bind(callerId, now, code).run();
+  // 1. Read-only pre-check — resolves not-found / already-redeemed / refunded
+  //    (including every replay) without mutating anything.
+  const pre = await env.DB.prepare(
+    `SELECT status, amount_usd_micros FROM credit_codes WHERE code = ?`
+  ).bind(code).first<{ status: string; amount_usd_micros: number }>();
+  if (!pre) return { redeemed: false, reason: "code_not_found" };
+  if (pre.status === "redeemed") return { redeemed: false, reason: "already_redeemed" };
+  if (pre.status === "refunded") return { redeemed: false, reason: "refunded" };
 
-  // D1 returns meta.changes for UPDATE
-  const changed = (result as any).meta?.changes ?? 0;
-  if (!changed) {
-    // Either code doesn't exist, or already redeemed/refunded.
-    const row = await env.DB.prepare(`SELECT status FROM credit_codes WHERE code = ?`).bind(code).first<{ status: string }>();
-    if (!row) return { redeemed: false, reason: "code_not_found" };
-    if (row.status === "redeemed") return { redeemed: false, reason: "already_redeemed" };
-    if (row.status === "refunded") return { redeemed: false, reason: "refunded" };
-    return { redeemed: false, reason: "claim_race" };
+  // 2. Claim + credit as one atomic batch (single transaction).
+  const redeemedAt = nextRedeemTs();
+  const claim = env.DB.prepare(
+    `UPDATE credit_codes
+        SET status = 'redeemed', redeemed_by_caller = ?1, redeemed_at = ?2
+      WHERE code = ?3 AND status = 'pending'`
+  ).bind(callerId, redeemedAt, code);
+  const credit = env.DB.prepare(
+    `INSERT INTO credit_balances (caller_id, balance_usd_micros, updated_at)
+     SELECT ?1, cc.amount_usd_micros, ?2
+       FROM credit_codes cc
+      WHERE cc.code = ?3
+        AND cc.status = 'redeemed'
+        AND cc.redeemed_by_caller = ?1
+        AND cc.redeemed_at = ?2
+     ON CONFLICT (caller_id) DO UPDATE SET
+       balance_usd_micros = balance_usd_micros + excluded.balance_usd_micros,
+       updated_at         = excluded.updated_at`
+  ).bind(callerId, redeemedAt, code);
+
+  let results: D1Result[];
+  try {
+    results = await env.DB.batch([claim, credit]);
+  } catch {
+    // Batch rolled back — the code remains 'pending' and no credit was applied.
+    return { redeemed: false, reason: "redeem_failed" };
   }
 
-  // Credit the caller's balance. Read the amount from the now-redeemed row.
-  const row = await env.DB.prepare(`SELECT amount_usd_micros FROM credit_codes WHERE code = ?`).bind(code).first<{ amount_usd_micros: number }>();
-  if (!row) throw new Error("credit_codes_invariant_violation");
-  await creditUsdMicros(env, callerId, row.amount_usd_micros);
-  return { redeemed: true, amount_usd_micros: row.amount_usd_micros };
+  const claimed = (results[0]?.meta?.changes ?? 0) === 1;
+  if (!claimed) {
+    // Lost a race to a concurrent redeemer between the pre-check and the batch.
+    return { redeemed: false, reason: "claim_race" };
+  }
+  return { redeemed: true, amount_usd_micros: pre.amount_usd_micros };
 }
 
 export async function getCodeBySession(env: Env, stripeSessionId: string): Promise<CreditCodeRow | null> {
