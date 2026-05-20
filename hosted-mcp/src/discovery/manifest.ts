@@ -4,9 +4,9 @@
 // (SEP-1649), /llms.txt, and the public landing page. Keep all human-readable copy here so
 // updates ripple to every discovery surface in one edit.
 
-export const SERVER_BASE_URL = "https://verdigraph-mcp.hartjustin6.workers.dev";
+export const SERVER_BASE_URL = "https://verdigraph.dev";
 export const REPO_URL        = "https://github.com/viridis-security/verdigraph-neurogenesis";
-export const HOMEPAGE_URL    = "https://verdigraph-mcp.hartjustin6.workers.dev";
+export const HOMEPAGE_URL    = "https://verdigraph.dev";
 export const LICENSE         = "MIT";
 export const SERVER_VERSION  = "0.2.0";
 export const VENDOR_NAME     = "Viridis LLC";
@@ -21,55 +21,76 @@ export interface ToolDescriptor {
   name: string;
   summary: string;
   metered: boolean;
+  // Iter3 P1.1: live per-call price for metered tools. Free tools may omit.
+  // ROUTING_FEE_USD ($0.002) applies to most metered MCP tools; surface-fee
+  // tools (brain_evolve, brain_attest_purchase) carry their own rate.
+  price_usd?: number;
 }
 
 export const TOOLS: ToolDescriptor[] = [
-  { name: "verdigraph_choose_compute_profile", summary: "Pick the cheapest reliable model + thinking budget for a task.", metered: true },
-  { name: "verdigraph_list_profiles",          summary: "List compute profiles with cost-per-1k token rates.",          metered: true },
-  { name: "verdigraph_create_agent",           summary: "Initialize a developmental agent from a genome.",              metered: true },
-  { name: "verdigraph_list_agents",            summary: "List the caller's active agents.",                              metered: true },
-  { name: "verdigraph_get_graph_summary",      summary: "Return node, edge, and ledger counts for an agent's graph.",   metered: true },
-  { name: "verdigraph_get_agent_state",        summary: "Return the agent's full developmental state.",                 metered: true },
-  { name: "verdigraph_submit_evaluation",      summary: "Submit a task evaluation; growth/pruning fires automatically.", metered: true },
-  { name: "verdigraph_best_next_steps",        summary: "Suggest the cheapest reliable route for a pending task.",      metered: true },
-  { name: "verdigraph_get_ledger",             summary: "Return the developmental ledger (immutable event log).",       metered: true },
-  { name: "verdigraph_save_agent_state",       summary: "Snapshot an agent's state to R2.",                              metered: true },
-  { name: "verdigraph_load_agent_state",       summary: "Rehydrate an agent from a saved snapshot.",                    metered: true },
-  { name: "verdigraph_delete_agent",           summary: "Permanently remove an agent and its state.",                    metered: true },
-  { name: "verdigraph_should_use_cache",       summary: "Decide whether a task should hit the response cache.",          metered: true },
-  { name: "verdigraph_should_escalate",        summary: "Decide whether to escalate to a higher-tier model.",            metered: true },
+  { name: "verdigraph_choose_compute_profile", summary: "Pick the cheapest reliable model + thinking budget for a task.", metered: true, price_usd: 0.002 },
+  { name: "verdigraph_list_profiles",          summary: "List compute profiles with cost-per-1k token rates.",          metered: true, price_usd: 0.002 },
+  { name: "verdigraph_create_agent",           summary: "Initialize a developmental agent from a genome.",              metered: true, price_usd: 0.002 },
+  { name: "verdigraph_list_agents",            summary: "List the caller's active agents.",                              metered: true, price_usd: 0.002 },
+  { name: "verdigraph_get_graph_summary",      summary: "Return node, edge, and ledger counts for an agent's graph.",   metered: true, price_usd: 0.002 },
+  { name: "verdigraph_get_agent_state",        summary: "Return the agent's full developmental state.",                 metered: true, price_usd: 0.002 },
+  { name: "verdigraph_submit_evaluation",      summary: "Submit a task evaluation; growth/pruning fires automatically.", metered: true, price_usd: 0.002 },
+  { name: "verdigraph_best_next_steps",        summary: "Suggest the cheapest reliable route for a pending task.",      metered: true, price_usd: 0.002 },
+  { name: "verdigraph_get_ledger",             summary: "Return the developmental ledger (immutable event log).",       metered: true, price_usd: 0.002 },
+  { name: "verdigraph_save_agent_state",       summary: "Snapshot an agent's state to R2.",                              metered: true, price_usd: 0.002 },
+  { name: "verdigraph_load_agent_state",       summary: "Rehydrate an agent from a saved snapshot.",                    metered: true, price_usd: 0.002 },
+  { name: "verdigraph_delete_agent",           summary: "Permanently remove an agent and its state.",                    metered: true, price_usd: 0.002 },
+  { name: "verdigraph_should_use_cache",       summary: "Decide whether a task should hit the response cache.",          metered: true, price_usd: 0.002 },
+  { name: "verdigraph_should_escalate",        summary: "Decide whether to escalate to a higher-tier model.",            metered: true, price_usd: 0.002 },
   { name: "verdigraph_get_balance",            summary: "Return the caller's current prepaid USD credit balance.",       metered: false },
   { name: "verdigraph_create_topup_session",   summary: "Create a Stripe Checkout session ($5–$500) to top up credits.", metered: false },
+  { name: "verdigraph_topup_url",              summary: "Return the public /credits URL to hand to a human for anonymous purchase.", metered: false },
+  { name: "verdigraph_redeem_credit_code",     summary: "Redeem a single-use vdc_ credit code (atomic claim + balance credit).", metered: false },
+  { name: "verdigraph_create_subscription",    summary: "Create a recurring $20/month credit auto-refill subscription.",       metered: false },
+  // ── Brain-builder shop (live MCP build environment) ──────────────────
+  { name: "brain_pair_session",                summary: "Pair an authenticated agent with a browser build session (BYO LLM).", metered: false },
+  { name: "brain_list_formats",                summary: "List supported agent file formats for brain import.",          metered: false },
+  { name: "brain_import",                      summary: "Deterministically build a Verdigraph brain from an agent file.", metered: true, price_usd: 0.002 },
+  { name: "brain_get",                         summary: "Fetch a brain artifact (paywall-gated; subscription unlocks all).", metered: true, price_usd: 0.002 },
+  { name: "brain_verify",                      summary: "Re-run the 9 brain invariants against an existing brain.",      metered: true, price_usd: 0.002 },
+  { name: "brain_evolve",                      summary: "Apply task events to mutate a brain under its growth_rules.",    metered: true, price_usd: 0.05 },
+  { name: "brain_checkout",                    summary: "Create a Stripe Checkout session ($9 one-time or $19/mo).",     metered: false },
+  // iter4.2 — marketplace tools removed (proprietary pivot). Brains are private
+  // property of the caller that built them. The Ed25519 attestation tier remains
+  // how an owner proves a brain's structure to downstream auditors.
+  // ── Compliance attestation tier (signed Ed25519) ─────────────────────
+  { name: "brain_attest_preview",              summary: "Preview an unsigned attestation for a brain (free).",                metered: false },
+  { name: "brain_attest_purchase",             summary: "Purchase a signed Ed25519 attestation ($199 standard / $499 enterprise).", metered: true, price_usd: 199.0 },
+  { name: "brain_attest_verify",               summary: "Verify a signed attestation's signature and content_hash.",          metered: false },
 ];
 
 export const CATEGORIES = [
-  "compute-routing",
-  "agent-economy",
-  "agent-to-agent",
-  "metered",
+  "developer-tools",
+  "private-cognition",
+  "deterministic-builds",
+  "compliance-attestation",
   "oauth-2.1",
-  "conservation",
-  "developmental-agents",
-  "neuromorphic",
+  "mcp",
 ];
 
 export const KEYWORDS = [
-  "verdigraph", "mcp", "hosted-mcp", "paid-mcp", "compute-routing", "agent-economy",
-  "agent-to-agent", "a2a", "metered", "stripe", "conservation", "oauth", "viridis",
-  "cognitive-graph", "self-evolving", "neuromorphic", "developmental-ai",
+  "verdigraph", "mcp", "hosted-mcp", "private-cognition", "deterministic-builds",
+  "content-addressed", "developer-tools", "secure-build-environment",
+  "compliance-attestation", "ed25519", "oauth", "viridis",
+  "cognitive-graph", "neuromorphic",
 ];
 
 export const SHORT_DESCRIPTION =
-  "Hosted, OAuth-authenticated, pay-per-call MCP for agent-to-agent compute routing. " +
-  "Prepaid USD credits via Stripe Checkout, atomic ledger, 25% of net revenue auto-routes to verified conservation.";
+  "A secure development environment for builders constructing private cognitive graphs. " +
+  "Deterministic content-addressed brain artifacts, free preview, optional Ed25519-signed compliance attestation.";
 
 export const LONG_DESCRIPTION =
-  "Verdigraph is a self-evolving cognitive substrate exposed as a paid, OAuth-authenticated MCP. " +
-  "Other autonomous agents (Claude, GPT, custom) can pay per call to: choose the cheapest reliable compute profile " +
-  "for a task, manage long-lived developmental agents whose cognitive graphs grow and prune based on real outcomes, " +
-  "and emit an immutable evaluation ledger. Prepaid credits via Stripe Checkout ($5–$500 top-ups), " +
-  "atomic micro-USD debit with INSUFFICIENT_CREDITS on zero balance, 25% of net revenue committed to verified " +
-  "Viridis conservation programs, monthly transparency cron writes payouts to a public auditable ledger.";
+  "Verdigraph is a secure development environment for builders constructing private cognitive graphs. " +
+  "Drop in an agent file (Claude project export, OpenAI Assistant config, Verdigraph genome, prompt list) and " +
+  "your own LLM constructs an inspectable cognitive brain in real time — with a content-addressed brain_id and " +
+  "content_hash that are byte-identical on every rebuild. Brains are private property of the building caller_id; " +
+  "the public surface only exposes a deterministic id, a free structural preview, and an optional Ed25519-signed " +
+  "compliance attestation (audit-grade, regulator-facing). Bring your own LLM. Prepaid USD credits via Stripe Checkout.";
 
 export const CONTACT_EMAIL = "hartjustin6@gmail.com";
 
@@ -159,6 +180,7 @@ export function buildServerCard() {
       name:    t.name,
       summary: t.summary,
       metered: t.metered,
+      ...(t.price_usd !== undefined ? { price_usd: t.price_usd } : {}),
     })),
     categories: CATEGORIES,
     keywords:   KEYWORDS,
@@ -166,10 +188,43 @@ export function buildServerCard() {
       claude_desktop: {
         type: "remote",
         url:  `${SERVER_BASE_URL}/mcp`,
+        config_snippet: {
+          mcpServers: {
+            verdigraph: { type: "http", url: `${SERVER_BASE_URL}/mcp` },
+          },
+        },
       },
       claude_code: {
         cmd: `claude mcp add --transport http verdigraph ${SERVER_BASE_URL}/mcp`,
       },
+      cowork: {
+        type: "remote",
+        url:  `${SERVER_BASE_URL}/mcp`,
+        instructions: "Cowork → Settings → Connectors → Add custom MCP server → paste the URL.",
+      },
+      onboarding_url: `${SERVER_BASE_URL}/connect`,
+    },
+    // Iter3 P1.5
+    openapi_url: `${SERVER_BASE_URL}/openapi.yaml`,
+    // Iter3 P0.2 — SEP-1649 amendment proposal: uri_schemes field
+    uri_schemes: [
+      {
+        scheme:      "verdigraph://brain/",
+        resolves_to: `${SERVER_BASE_URL}/app/brains/{id}`,
+        format:      "Crockford-base32, 26 chars",
+        example:     "verdigraph://brain/G0HMXXZ360QZWNVHHWKXMHZVCJ",
+      },
+      {
+        scheme:      "verdigraph://genome/",
+        resolves_to: `${SERVER_BASE_URL}/app/genomes/{id}`,
+        format:      "future",
+        example:     "verdigraph://genome/<reserved>",
+      },
+    ],
+    uri_handler_install: {
+      macos:   `${SERVER_BASE_URL}/scripts/uri-handler/install-macos.sh`,
+      windows: `${SERVER_BASE_URL}/scripts/uri-handler/install-windows.ps1`,
+      linux:   `${SERVER_BASE_URL}/scripts/uri-handler/install-linux.sh`,
     },
   };
 }

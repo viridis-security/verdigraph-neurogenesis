@@ -21,6 +21,7 @@ import { CallerRegistry } from "../verdigraph/registry";
 import { meteredCall } from "./metering";
 import { getBalanceUsdMicros, microsToUsdString } from "../billing/credits";
 import { createTopupSession } from "../billing/checkout";
+import { registerBrainTools } from "./brain_tools";
 import type { Env } from "../index";
 
 interface AuthCtx extends Record<string, unknown> {
@@ -341,6 +342,65 @@ export class VerdigraphAgent extends McpAgent<Env, unknown, AuthCtx> {
         return createTopupSession(env, req);
       },
     );
+
+    // ── 17. verdigraph_topup_url (free — public anonymous credits URL) ─
+    freeTool(
+      "verdigraph_topup_url",
+      {
+        amount_usd: z.number().min(5).max(500).optional().describe("Optional preset amount to preselect on the page."),
+      },
+      async (args) => {
+        const u = new URL("https://verdigraph.dev/credits");
+        if (args.amount_usd) u.searchParams.set("amount", String(args.amount_usd));
+        return {
+          url: u.toString(),
+          hint: "Hand this URL to your human; they pay anonymously and get a vdc_ code to redeem via verdigraph_redeem_credit_code. Or supply your caller_id on the page and credits land directly.",
+        };
+      },
+    );
+
+    // ── 18. verdigraph_redeem_credit_code (free — claim vdc_ code) ─────
+    freeTool(
+      "verdigraph_redeem_credit_code",
+      {
+        code: z.string().regex(/^vdc_[A-Z0-9]{24}$/).describe("Single-use credit code from /credits anonymous purchase."),
+      },
+      async (args) => {
+        const { redeemCreditCode } = await import("../billing/credit_codes");
+        const out = await redeemCreditCode(env, args.code, callerId);
+        if (!out.redeemed) {
+          return { ok: false, reason: out.reason };
+        }
+        return {
+          ok: true,
+          credited_usd_micros: out.amount_usd_micros,
+          credited_usd: ((out.amount_usd_micros ?? 0) / 1_000_000).toFixed(2),
+        };
+      },
+    );
+
+    // ── 19. verdigraph_create_subscription (free — $20/mo auto-refill) ─
+    freeTool(
+      "verdigraph_create_subscription",
+      {
+        amount_usd:  z.number().min(5).max(100).default(20).describe("Monthly auto-refill amount (default $20)."),
+        success_url: z.string().url().optional(),
+        cancel_url:  z.string().url().optional(),
+      },
+      async (args) => {
+        const { createCreditsCheckout } = await import("../billing/credits_page");
+        return createCreditsCheckout(env, {
+          amountUsd: args.amount_usd,
+          callerId,
+          isSubscription: true,
+          successUrl: args.success_url,
+          cancelUrl:  args.cancel_url,
+        });
+      },
+    );
+
+    // ── Brain-builder tool group (live MCP build environment) ───────────
+    registerBrainTools({ env, callerId, tool, freeTool });
   }
 }
 

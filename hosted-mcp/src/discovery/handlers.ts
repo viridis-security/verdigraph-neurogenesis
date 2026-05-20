@@ -4,6 +4,10 @@
 // to indicate the OAuth/MCP pipeline should handle it. All endpoints are
 // public (no OAuth required) and cacheable.
 
+import { CANONICALIZATION_MD } from "./canonicalization_doc";
+// iter5 — marketplace_html module deleted (no website surface)
+import { INSTALL_MACOS_SH, INSTALL_WINDOWS_PS1, INSTALL_LINUX_SH } from "./uri_handler_scripts";
+import { OPENAPI_YAML } from "./openapi_doc";
 import {
   buildSep1960Manifest,
   buildServerCard,
@@ -20,6 +24,8 @@ import {
   VENDOR_NAME,
   SERVER_VERSION,
   LICENSE,
+  VENDOR_URL,
+  KEYWORDS,
 } from "./manifest";
 
 const JSON_HEADERS = (maxAgeSec: number) => ({
@@ -87,6 +93,22 @@ export function tryHandleDiscovery(request: Request): Response | null {
     case "/icon.svg":
       return makeBody(method, renderIconSvg(), TEXT_HEADERS(86400, "image/svg+xml"));
 
+    case "/CANONICALIZATION.md":
+      return makeBody(method, CANONICALIZATION_MD, TEXT_HEADERS(3600, "text/markdown"));
+
+    case "/openapi.yaml":
+    case "/openapi.yml":
+      return makeBody(method, OPENAPI_YAML, TEXT_HEADERS(3600, "application/yaml"));
+
+    case "/scripts/uri-handler/install-macos.sh":
+      return makeBody(method, INSTALL_MACOS_SH, TEXT_HEADERS(3600, "text/x-shellscript"));
+
+    case "/scripts/uri-handler/install-windows.ps1":
+      return makeBody(method, INSTALL_WINDOWS_PS1, TEXT_HEADERS(3600, "text/plain"));
+
+    case "/scripts/uri-handler/install-linux.sh":
+      return makeBody(method, INSTALL_LINUX_SH, TEXT_HEADERS(3600, "text/x-shellscript"));
+
     default:
       return null;
   }
@@ -107,7 +129,68 @@ function renderLlmsTxt(): string {
 > ${SHORT_DESCRIPTION}
 
 This is a hosted, OAuth 2.1 + PKCE authenticated Model Context Protocol server.
-Pay per call in USD via Stripe Checkout. ${CONSERVATION_NUMERATOR * 100 / CONSERVATION_DENOMINATOR}% of net revenue is routed to verified conservation programs.
+Pay per call in USD via Stripe Checkout. Prepaid USD credits, atomic micro-USD debit, INSUFFICIENT_CREDITS on zero balance.
+
+## Brain-building shop (live MCP build environment, PRIVATE brains)
+
+- Human-facing UI: ${SERVER_BASE_URL}/app
+- Pair an agent to a browser session via brain_pair_session (BYO LLM — we never proxy inference).
+- Import: brain_import (free preview). Unlock: $9 one-time or $19/mo.
+- Brains are PRIVATE PROPERTY of the building caller_id. No public marketplace.
+  An owner can prove a brain's structure to a downstream party via:
+    (1) the deterministic brain_id + source genome bytes (zero-trust),
+    (2) the free /app/import preview (no auth; node ids + edges + invariants),
+    (3) a purchased Ed25519 attestation ($199 standard / $499 enterprise — see brain_attest_*).
+
+## Public /app/import endpoint (auth-free, deterministic, idempotent)
+
+Free preview build. Same input bytes always produce the same brain_id + content_hash.
+Request:
+  POST ${SERVER_BASE_URL}/app/import
+  content-type: application/json
+  body: { "format": "verdigraph_genome" | "claude_project_export" | "openai_assistant" | "prompt_list" | "auto",
+          "content": "<stringified agent JSON or newline-separated prompts>" }
+Response (200):
+  { "ok": true,
+    "preview": { brain_id, brain_uri, content_hash, agent_name, node_count, edge_count,
+                 node_ids[], edges[], sample_nodes[], llm_bindings, provenance, paywall },
+    "invariants": { passed, checks: [{ id, description, passed, passed_with_default?, advisory?, detail? }] } }
+Response headers include x-verdigraph-content-hash, x-verdigraph-brain-id, x-verdigraph-deterministic=1.
+
+Curl example:
+  curl -sS -X POST ${SERVER_BASE_URL}/app/import \
+    -H 'content-type: application/json' \
+    --data '{"format":"verdigraph_genome","content":"{\"agent_name\":\"x\",\"purpose\":\"y\",\"initial_nodes\":[\"a\"],\"fitness_metrics\":[\"task_success_rate\"]}"}' \
+    | jq '.preview.brain_id, .preview.content_hash, .invariants.passed'
+
+See ${SERVER_BASE_URL}/CANONICALIZATION.md for the exact canonical-JSON rule used to derive content_hash.
+
+## Build session (live MCP pairing, optional)
+
+The deterministic build path (POST /app/import) is the recommended way to construct
+brains from code or CI. The interactive Build session is a SECOND path for cases
+where a human watching the browser wants to see their own LLM agent operate the
+build environment in real time via the brain_* MCP tools.
+
+How it works:
+  1. Open ${SERVER_BASE_URL}/app — a fresh build_session_id is minted automatically
+     and a Crockford-base32 pairing code (format XXXX-XXXX) appears.
+  2. The user pastes the pairing code into their LLM agent (Claude Desktop, Cowork,
+     a custom client) so the agent can call brain_pair_session(pairing_code) over
+     /mcp. After successful pair, the agent has a session_id it can include on
+     subsequent brain_import / brain_evolve / brain_verify calls.
+  3. Every tool call carrying that build_session_id emits start / result / error /
+     invariant_report events onto an SSE stream the /app browser is already
+     subscribed to at /app/sessions/:id/events. The browser renders the events as
+     they happen — live tool-call log on the right, invariants flipping green/red,
+     the central graph mutating as the agent evolves the brain.
+  4. The session closes when the page closes or the agent calls a sessionClose tool.
+
+When to use which:
+  - Deterministic / CI / agent-only:   POST /app/import (auth-free, idempotent, fast)
+  - Human-in-the-loop / demo / debug:  brain_pair_session + brain_* MCP tools
+  - The same brain artifact is produced either way; pairing adds live observability
+    rather than changing what gets built.
 
 ## For agents
 
@@ -119,6 +202,46 @@ Pay per call in USD via Stripe Checkout. ${CONSERVATION_NUMERATOR * 100 / CONSER
 ## Tools (${TOOLS.length})
 
 ${TOOLS.map(t => `- ${t.name}${t.metered ? "" : " (free)"} — ${t.summary}`).join("\n")}
+
+## Connecting your agent (Claude Desktop / Claude Code / Cowork)
+
+The full onboarding page with copy-paste install JSON and the 4-step "paid-to-using"
+walkthrough lives at ${SERVER_BASE_URL}/connect. After paying at ${SERVER_BASE_URL}/credits,
+the success page reuses the same onboarding flow with the credit code prepended.
+
+Claude Desktop config snippet:
+  { "mcpServers": { "verdigraph": { "type": "http", "url": "${SERVER_BASE_URL}/mcp" } } }
+
+Claude Code one-liner:
+  claude mcp add --transport http verdigraph ${SERVER_BASE_URL}/mcp
+
+Cowork: Settings → Connectors → Add custom MCP server → paste ${SERVER_BASE_URL}/mcp.
+
+All three clients drive OAuth 2.1 + PKCE on first tool call. The caller_id is minted
+server-side at that point; the client stores the bearer token automatically.
+
+## Buying API credits
+
+Three paths, in increasing order of integration:
+
+  (a) Anonymous purchase (no auth required):
+        Open ${SERVER_BASE_URL}/credits → pick an amount → either supply your
+        caller_id (credits land directly) OR leave blank + supply email and a
+        single-use vdc_<24-char> code is minted. Redeem the code in your bot's
+        first authenticated session via verdigraph_redeem_credit_code(code).
+
+  (b) Authenticated topup (OAuth'd bot):
+        Call verdigraph_create_topup_session(amount_usd) → returns a Stripe
+        Checkout URL pre-bound to your caller_id. Hand to your human; on
+        payment, credits land on your caller automatically.
+
+  (c) Monthly auto-refill (OAuth'd bot):
+        Call verdigraph_create_subscription(amount_usd: 20) → recurring
+        Stripe subscription at the chosen monthly amount. Each invoice.paid
+        credits your caller. Cancel any time; unused credits never expire.
+
+INSUFFICIENT_CREDITS responses always carry topup_url + recommended_amount_usd
+so error-handling code can surface the next step without guessing.
 
 ## Pricing
 
@@ -174,118 +297,73 @@ function renderIconSvg(): string {
 }
 
 function renderLandingPage(): string {
-  const claudeMcpJson = JSON.stringify({
-    mcpServers: {
-      verdigraph: { type: "http", url: `${SERVER_BASE_URL}/mcp` },
-    },
-  }, null, 2);
-
+  // Iter5 — website scrapped. The MCP service is the product. This stub exists
+  // only so SEP-1960 manifest's homepage URL returns 200 + carries Schema.org
+  // metadata for registry crawlers. All install + docs live in the GitHub README.
   const schemaOrg = JSON.stringify({
     "@context":   "https://schema.org",
-    "@type":      "SoftwareApplication",
+    "@type":      "SoftwareSourceCode",
     "name":       "verdigraph-mcp",
     "description": SHORT_DESCRIPTION,
     "url":         HOMEPAGE_URL,
-    "applicationCategory": "DeveloperApplication",
-    "operatingSystem":     "Cloudflare Workers (hosted)",
-    "softwareVersion":     SERVER_VERSION,
-    "license":             `https://opensource.org/licenses/${LICENSE}`,
-    "author":              { "@type": "Organization", "name": VENDOR_NAME },
-    "offers": {
-      "@type":    "Offer",
-      "price":    String(ROUTING_FEE_USD),
-      "priceCurrency": "USD",
-      "category": "PerCallRoutingFee",
-    },
+    "codeRepository": REPO_URL,
+    "license":     `https://opensource.org/licenses/${LICENSE}`,
+    "softwareVersion": SERVER_VERSION,
+    "author":      { "@type": "Organization", "name": VENDOR_NAME, "url": VENDOR_URL },
+    "programmingLanguage": "TypeScript",
   });
-
   return `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>verdigraph-mcp — paid hosted MCP for agent-to-agent compute routing</title>
+<title>verdigraph-mcp — secure private cognitive graphs (MCP service)</title>
 <meta name="description" content="${escapeHtml(SHORT_DESCRIPTION)}"/>
-<meta name="keywords" content="${CATEGORIES.join(", ")}"/>
-
-<!-- OpenGraph -->
+<meta name="keywords" content="${KEYWORDS.join(", ")}"/>
 <meta property="og:type"        content="website"/>
-<meta property="og:site_name"   content="verdigraph-mcp"/>
-<meta property="og:title"       content="verdigraph-mcp — paid hosted MCP"/>
+<meta property="og:title"       content="verdigraph-mcp"/>
 <meta property="og:description" content="${escapeHtml(SHORT_DESCRIPTION)}"/>
 <meta property="og:url"         content="${HOMEPAGE_URL}"/>
-<meta property="og:image"       content="${SERVER_BASE_URL}/icon.svg"/>
-
-<!-- Twitter -->
-<meta name="twitter:card"        content="summary"/>
-<meta name="twitter:title"       content="verdigraph-mcp"/>
-<meta name="twitter:description" content="${escapeHtml(SHORT_DESCRIPTION)}"/>
-
-<!-- Discovery hints for bots -->
-<link rel="manifest"  href="${SERVER_BASE_URL}/.well-known/mcp"/>
-<link rel="alternate" type="application/json" href="${SERVER_BASE_URL}/.well-known/mcp/server-card.json" title="MCP server card"/>
+<link rel="canonical" href="${REPO_URL}"/>
+<link rel="alternate" type="application/json" href="${SERVER_BASE_URL}/.well-known/mcp" title="SEP-1960 MCP manifest"/>
 <link rel="alternate" type="text/plain"       href="${SERVER_BASE_URL}/llms.txt" title="llms.txt"/>
-<link rel="icon"      type="image/svg+xml"    href="${SERVER_BASE_URL}/icon.svg"/>
-
+<link rel="alternate" type="application/yaml" href="${SERVER_BASE_URL}/openapi.yaml" title="OpenAPI 3.1 spec"/>
+<link rel="icon" type="image/svg+xml" href="${SERVER_BASE_URL}/icon.svg"/>
 <script type="application/ld+json">${schemaOrg}</script>
-
 <style>
-  :root { --bg:#0f3d2e; --fg:#e8f5ef; --mute:#9bcfba; --accent:#7fd1b9; --pad: clamp(20px, 4vw, 48px); }
-  * { box-sizing: border-box; }
-  body { margin:0; font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background:var(--bg); color:var(--fg); }
-  main { max-width: 860px; margin: 0 auto; padding: var(--pad); }
-  h1 { font-size: clamp(28px, 5vw, 44px); margin: 0 0 8px; letter-spacing: -0.02em; }
-  h2 { font-size: 20px; margin: 32px 0 8px; color: var(--accent); }
-  p, li { color: var(--fg); }
-  .lede { color: var(--mute); font-size: clamp(16px, 2.2vw, 19px); margin: 4px 0 24px; }
-  code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-  pre { background: #0a2a20; border: 1px solid #1f5942; border-radius: 8px; padding: 14px 16px; overflow-x: auto; font-size: 13px; }
-  a { color: var(--accent); }
-  ul { padding-left: 20px; }
-  .pills { display:flex; flex-wrap:wrap; gap:6px; margin: 8px 0 16px; }
-  .pill { font-size: 11px; padding: 4px 10px; border:1px solid var(--accent); border-radius: 999px; color: var(--accent); }
-  .meta { color: var(--mute); font-size: 13px; }
-  hr { border: none; border-top: 1px solid #1f5942; margin: 32px 0; }
+  body { margin:0; background:#0b0f0c; color:#e8f1ec; font:15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+  main { max-width:680px; margin:0 auto; padding:64px 24px; }
+  h1 { font-size:22px; letter-spacing:0.5px; margin:0 0 8px; }
+  .lede { color:#9bb1a5; font-size:15px; margin:0 0 28px; }
+  pre { background:#0a120d; border:1px solid #1f2a23; border-radius:6px; padding:12px 14px; font:13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; overflow-x:auto; }
+  a { color:#7fd1b9; }
+  ul { padding-left:20px; }
+  li { margin:4px 0; }
 </style>
 </head>
 <body>
 <main>
   <h1>verdigraph-mcp</h1>
   <p class="lede">${escapeHtml(SHORT_DESCRIPTION)}</p>
-  <div class="pills">${CATEGORIES.map(c => `<span class="pill">${c}</span>`).join("")}</div>
 
-  <h2>Add to Claude Desktop (one-click JSON)</h2>
-  <pre><code>${escapeHtml(claudeMcpJson)}</code></pre>
+  <p>This is the hosted MCP runtime. Install instructions, OAuth flow, API examples, and docs live in the GitHub repo:</p>
 
-  <h2>Add to Claude Code</h2>
-  <pre><code>claude mcp add --transport http verdigraph ${SERVER_BASE_URL}/mcp</code></pre>
+  <p><a href="${REPO_URL}">${REPO_URL}</a></p>
 
-  <h2>For autonomous agents</h2>
+  <h3 style="font-size:14px; margin:24px 0 8px; color:#9bb1a5; text-transform:uppercase; letter-spacing:1px;">Quick connect</h3>
+  <pre>claude mcp add --transport http verdigraph ${SERVER_BASE_URL}/mcp</pre>
+
+  <h3 style="font-size:14px; margin:24px 0 8px; color:#9bb1a5; text-transform:uppercase; letter-spacing:1px;">Machine-readable surfaces</h3>
   <ul>
-    <li>MCP endpoint (Streamable HTTP &amp; SSE): <a href="${SERVER_BASE_URL}/mcp"><code>${SERVER_BASE_URL}/mcp</code></a></li>
-    <li>SEP-1960 manifest: <a href="${SERVER_BASE_URL}/.well-known/mcp"><code>/.well-known/mcp</code></a></li>
-    <li>SEP-1649 server card: <a href="${SERVER_BASE_URL}/.well-known/mcp/server-card.json"><code>/.well-known/mcp/server-card.json</code></a></li>
-    <li>llms.txt: <a href="${SERVER_BASE_URL}/llms.txt"><code>/llms.txt</code></a></li>
-    <li>OAuth metadata: <a href="${SERVER_BASE_URL}/.well-known/oauth-authorization-server"><code>/.well-known/oauth-authorization-server</code></a></li>
+    <li><a href="${SERVER_BASE_URL}/mcp">${SERVER_BASE_URL}/mcp</a> — OAuth-gated MCP endpoint (Streamable HTTP + SSE)</li>
+    <li><a href="${SERVER_BASE_URL}/.well-known/mcp">/.well-known/mcp</a> — SEP-1960 manifest</li>
+    <li><a href="${SERVER_BASE_URL}/.well-known/mcp/server-card.json">/.well-known/mcp/server-card.json</a> — SEP-1649 server card</li>
+    <li><a href="${SERVER_BASE_URL}/openapi.yaml">/openapi.yaml</a> — OpenAPI 3.1</li>
+    <li><a href="${SERVER_BASE_URL}/CANONICALIZATION.md">/CANONICALIZATION.md</a> — brain.v1 deterministic-build spec</li>
+    <li><a href="${SERVER_BASE_URL}/llms.txt">/llms.txt</a> — llmstxt.org agent-discovery summary</li>
   </ul>
 
-  <h2>Pricing</h2>
-  <ul>
-    <li>Top-ups: <strong>$5–$500</strong> via Stripe Checkout (USD, livemode).</li>
-    <li>Per-call routing fee: <strong>$${ROUTING_FEE_USD.toFixed(3)}</strong>, plus model passthrough at provider rates.</li>
-    <li>Insufficient credits returns <code>INSUFFICIENT_CREDITS</code> with no charge taken.</li>
-  </ul>
-
-  <h2>Conservation commitment (binding)</h2>
-  <p><strong>${CONSERVATION_NUMERATOR * 100 / CONSERVATION_DENOMINATOR}% of net revenue</strong> (gross minus model passthrough) is committed to verified Viridis conservation programs. A monthly cron writes payouts into a public auditable ledger.</p>
-
-  <h2>Tools (${TOOLS.length})</h2>
-  <ul>
-    ${TOOLS.map(t => `<li><code>${t.name}</code>${t.metered ? "" : " <span class=\"meta\">(free)</span>"} — ${escapeHtml(t.summary)}</li>`).join("\n    ")}
-  </ul>
-
-  <hr/>
-  <p class="meta">Source: <a href="${REPO_URL}">${REPO_URL}</a> · License: ${LICENSE} · v${SERVER_VERSION}</p>
+  <p style="margin-top:32px; font-size:12px; color:#5b7268;">Version ${SERVER_VERSION} · License ${LICENSE} · Maintained by ${VENDOR_NAME}</p>
 </main>
 </body>
 </html>`;

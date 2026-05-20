@@ -13,7 +13,7 @@ import type { Env } from "../index";
 
 const MIN_TOPUP_USD = 5;
 const MAX_TOPUP_USD = 500;
-const DEFAULT_RETURN_URL = "https://verdigraph.ai/billing/return"; // placeholder; not yet built
+const DEFAULT_RETURN_URL = "https://verdigraph.dev/billing/return"; // placeholder; not yet built
 
 export interface TopupRequest {
   callerId:   string;

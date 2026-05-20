@@ -58,7 +58,7 @@ describe("discovery handler — landing /", () => {
     expect(body).toContain("verdigraph-mcp");
     expect(body).toContain('og:title');
     expect(body).toContain('application/ld+json');
-    expect(body).toMatch(/"@type":\s*"SoftwareApplication"/);
+    expect(body).toMatch(/"@type":\s*"SoftwareSourceCode"/);  // iter5 — website scrapped; landing is now a SoftwareSourceCode pointer to the GitHub repo.
     expect(body).toContain(`${SERVER_BASE_URL}/mcp`); // Add-to-Claude JSON has the live URL
     expect(body).toContain(`/.well-known/mcp`);       // discovery surface advertised
   });

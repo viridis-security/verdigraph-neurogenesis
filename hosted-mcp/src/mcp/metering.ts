@@ -39,6 +39,14 @@ export interface MeteredOutput<TResult> {
   };
 }
 
+function recommendTopupUsd(balanceMicros: number, requiredMicros: number): number {
+  const gapUsd = Math.max(0, (requiredMicros - balanceMicros) / 1_000_000);
+  if (gapUsd <= 5)   return 5;
+  if (gapUsd <= 20)  return 20;
+  if (gapUsd <= 100) return 100;
+  return Math.min(500, Math.ceil(gapUsd / 50) * 50);
+}
+
 export async function meteredCall<TResult>(
   env: Env,
   ctx: MeteredCallContext,
@@ -82,12 +90,16 @@ export async function meteredCall<TResult>(
         errorCode: "INSUFFICIENT_CREDITS",
         latencyMs: Date.now() - t0,
       });
+      const recommend = recommendTopupUsd(err.balanceUsdMicros, err.requiredUsdMicros);
       return {
         result: {
           error: err.message,
+          error_code: "INSUFFICIENT_CREDITS",
           balance_usd_micros:  err.balanceUsdMicros,
           required_usd_micros: err.requiredUsdMicros,
-          remedy: "Call verdigraph_create_topup_session to add credits.",
+          topup_url: "https://verdigraph.dev/credits",
+          recommended_amount_usd: recommend,
+          remedy: `Visit https://verdigraph.dev/credits to top up (recommend $${recommend}). Or call verdigraph_create_topup_session for an OAuth'd Stripe link, or verdigraph_redeem_credit_code if you have a vdc_ code.`,
         } as unknown as TResult,
         row,
         replayed: false,
@@ -140,12 +152,16 @@ export async function meteredCall<TResult>(
         latencyMs: Date.now() - t0,
       });
       const balanceAfter = await getBalanceUsdMicros(env, ctx.callerId);
+      const recommend2 = recommendTopupUsd(balanceAfter, passthroughDebit);
       return {
         result: {
           error: (err as Error).message,
+          error_code: "INSUFFICIENT_CREDITS_FOR_PASSTHROUGH",
           balance_usd_micros:  balanceAfter,
           required_usd_micros: passthroughDebit,
-          remedy: "Call verdigraph_create_topup_session to add credits.",
+          topup_url: "https://verdigraph.dev/credits",
+          recommended_amount_usd: recommend2,
+          remedy: `Visit https://verdigraph.dev/credits to top up (recommend $${recommend2}). Or call verdigraph_create_topup_session for an OAuth'd Stripe link.`,
         } as unknown as TResult,
         row,
         replayed: false,

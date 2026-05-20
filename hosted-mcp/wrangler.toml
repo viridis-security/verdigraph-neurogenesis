@@ -6,6 +6,12 @@ main = "src/index.ts"
 compatibility_date = "2026-05-01"
 compatibility_flags = ["nodejs_compat"]
 
+# ─── Custom-domain routes (top-level — verdigraph.dev zone under Cloudflare) ─
+routes = [
+  { pattern = "verdigraph.dev", custom_domain = true },
+  { pattern = "www.verdigraph.dev", custom_domain = true },
+]
+
 # ─── D1: ledger, callers, conservation payouts (WNAM) ────────────────────
 [[d1_databases]]
 binding       = "DB"
@@ -43,6 +49,7 @@ crons = ["0 0 1 * *"]
 # ANTHROPIC_API_KEY        — for routed Haiku/Sonnet calls when compute_optimizer picks them
 # CONSERVATION_RECIPIENT   — Stripe Connect account id for the Viridis conservation fund
 # STRIPE_METER_EVENT_NAME  — optional override for the Stripe meter name (default: verdigraph_calls)
+
 
 [vars]
 ENVIRONMENT             = "production"
