@@ -1,0 +1,38 @@
+VERDIGRAPH COMPUTE-EFFICIENCY BENCHMARK
+================================================================
+Workload: 240 tasks (seed 7) — 160 fresh, 80 repeats
+  fresh difficulty: {'low': 103, 'medium': 45, 'high': 12}
+
+                              BASELINE      VERDIGRAPH
+  (naive static)                        (router+cache)
+----------------------------------------------------------------
+energy (kWh)                   0.28291         0.07255
+carbon (gCO2e)                   125.9            32.3
+dollar cost (USD)               3.9594          0.8529
+wall time (hours)                0.147           0.050
+mean success                    0.9278          0.9022
+success / kWh                    787.1          2984.4
+----------------------------------------------------------------
+  energy reduction        74.3 %
+  carbon reduction        74.3 %
+  dollar reduction        78.5 %
+  wall-time reduction     66.0 %
+  success delta         -0.0256  (floor met in both modes)
+  efficiency gain         3.79 x  (successful tasks per kWh)
+
+WHERE THE SAVING COMES FROM
+----------------------------------------------------------------
+  cache reuse             40.6 %  (0.08533 kWh)
+  compute routing         59.4 %  (0.12503 kWh)
+  reconciles with delta : True
+
+THERMODYNAMIC CONTEXT (Landauer)
+----------------------------------------------------------------
+  Landauer floor        2.871e-21 J / bit (300 K)
+  baseline runs         2.137e+20 x above the floor
+  verdigraph runs       5.633e+19 x above the floor
+================================================================
+Baseline = every task to the frontier model, no cache, no routing.
+Energy figures are estimates from cited 2025 coefficients (see JSON);
+calibrate against measured datacenter telemetry before reporting as
+verified. Methodology and invariants: verdigraph/thermo.py.

@@ -1,0 +1,85 @@
+{
+  "seed": 7,
+  "n_tasks": 240,
+  "workload": {
+    "total": 240,
+    "fresh": 160,
+    "repeats": 80,
+    "fresh_difficulty_tiers": {
+      "low": 103,
+      "medium": 45,
+      "high": 12
+    }
+  },
+  "baseline": {
+    "energy_kwh": 0.282909,
+    "carbon_gco2e": 125.894,
+    "dollar_cost_usd": 3.9594,
+    "wall_hours": 0.1467,
+    "mean_success": 0.9278,
+    "model_calls": 240,
+    "cache_hits": 0,
+    "tokens_processed": 604506,
+    "successful_tasks_per_kwh": 787.1,
+    "backend_calls": {
+      "frontier_cloud": 240
+    }
+  },
+  "verdigraph": {
+    "energy_kwh": 0.072555,
+    "carbon_gco2e": 32.287,
+    "dollar_cost_usd": 0.8529,
+    "wall_hours": 0.0499,
+    "mean_success": 0.9022,
+    "model_calls": 165,
+    "cache_hits": 75,
+    "tokens_processed": 422172,
+    "successful_tasks_per_kwh": 2984.4,
+    "backend_calls": {
+      "cache": 75,
+      "efficient_cloud": 142,
+      "frontier_cloud": 23
+    }
+  },
+  "delta": {
+    "energy_reduction_pct": 74.35,
+    "carbon_reduction_pct": 74.35,
+    "cost_reduction_pct": 78.46,
+    "wall_time_reduction_pct": 66.0,
+    "mean_success_baseline": 0.9278,
+    "mean_success_verdigraph": 0.9022,
+    "success_delta": -0.0256,
+    "efficiency_gain_x": 3.79
+  },
+  "decomposition": {
+    "cache_saving_kwh": 0.085326,
+    "routing_saving_kwh": 0.125028,
+    "cache_share_of_saving_pct": 40.56,
+    "routing_share_of_saving_pct": 59.44,
+    "reconciles": true
+  },
+  "thermodynamics": {
+    "temperature_k": 300.0,
+    "landauer_floor_j_per_bit": 2.870978885078724e-21,
+    "baseline_joules_per_useful_bit": 0.6134902803163524,
+    "verdigraph_joules_per_useful_bit": 0.16171288522322558,
+    "baseline_thermo_efficiency": 4.679746325562443e-21,
+    "verdigraph_thermo_efficiency": 1.77535567503831e-20,
+    "baseline_landauer_headroom_x": 2.1368679634142632e+20,
+    "verdigraph_landauer_headroom_x": 5.632674139949006e+19,
+    "note": "Thermodynamic efficiency is the fraction of the Landauer limit achieved; headroom is how many times above the floor the system runs. Both modes sit far above the floor \u2014 the gap between them is the measured efficiency gain."
+  },
+  "coefficients": {
+    "grid_gco2e_per_kwh": 445.0,
+    "grid_source": "IEA global average electricity carbon intensity, 2024",
+    "pue": 1.56,
+    "pue_source": "Uptime Institute Global Data Center Survey 2024",
+    "bits_per_token": 10.0,
+    "backends_wh_per_1k_tokens": {
+      "efficient_cloud": 0.08,
+      "frontier_cloud": 0.3,
+      "local_small": 0.02
+    },
+    "cache_wh_per_hit": 5e-05
+  }
+}
