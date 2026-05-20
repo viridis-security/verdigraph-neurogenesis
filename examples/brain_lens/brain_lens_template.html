@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verdigraph · 3D Brain Lens</title>
+<style>
+  :root{
+    --bg:#0a1410; --bg2:#0e1c16; --panel:rgba(13,26,21,.82);
+    --line:#1f3a2e; --teal:#3fb8c4; --green:#5fd86a; --gold:#e8b84b;
+    --grey:#5a6b62; --red:#e0584a; --txt:#cfe6da; --dim:#7c9389;
+    --mono:'SFMono-Regular',Menlo,Consolas,'Liberation Mono',monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:var(--bg);overflow:hidden;font-family:var(--sans);color:var(--txt)}
+  #scene{position:fixed;inset:0;display:block}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+
+  /* top-left identity */
+  #hud-top{position:fixed;top:14px;left:14px;padding:11px 14px;max-width:330px;z-index:5}
+  #hud-top .title{font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--green);font-weight:700}
+  #hud-top .agent{font-size:15px;font-weight:600;margin-top:3px;color:#eaf6ef}
+  #hud-top .bid{font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-top:4px;word-break:break-all}
+  #hud-top .inv{font-size:10px;color:var(--dim);margin-top:7px;border-top:1px solid var(--line);padding-top:6px;line-height:1.5}
+
+  /* right stats panel */
+  #panel{position:fixed;top:14px;right:14px;width:268px;padding:13px 14px;z-index:5;font-size:12px}
+  #panel h3{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--green);margin-bottom:8px;font-weight:700}
+  .stat{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dotted var(--line)}
+  .stat .k{color:var(--dim)} .stat .v{font-family:var(--mono);color:#eaf6ef}
+  .stat .v.hl{color:var(--green)}
+  #sel{margin-top:11px;border-top:1px solid var(--line);padding-top:9px;min-height:54px}
+  #sel .empty{color:var(--dim);font-style:italic;font-size:11px}
+  #sel .nname{font-weight:600;font-size:13px;color:#eaf6ef}
+  #sel .ntype{font-family:var(--mono);font-size:10px;margin:2px 0 6px}
+  #sel .ndesc{font-size:10.5px;color:var(--dim);line-height:1.5;margin-bottom:6px}
+  .legend{margin-top:11px;border-top:1px solid var(--line);padding-top:9px}
+  .lrow{display:flex;align-items:center;gap:8px;padding:2.5px 0;font-size:11px;color:var(--dim)}
+  .dot{width:10px;height:10px;border-radius:50%;flex:none;box-shadow:0 0 6px currentColor}
+
+  /* ledger feed */
+  #feed{position:fixed;left:14px;bottom:92px;width:330px;max-height:38vh;padding:10px 12px;z-index:5;
+    display:flex;flex-direction:column}
+  #feed h3{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--green);margin-bottom:7px;font-weight:700;flex:none}
+  #feed-list{overflow-y:auto;font-family:var(--mono);font-size:10.5px;line-height:1.6}
+  #feed-list::-webkit-scrollbar{width:5px} #feed-list::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
+  .ev{display:flex;gap:7px;opacity:.92} .ev .tag{flex:none;width:9px;text-align:center}
+  .ev .msg{color:var(--dim)} .ev.fresh{opacity:1}
+
+  /* bottom transport */
+  #controls{position:fixed;left:14px;right:14px;bottom:14px;padding:11px 16px;z-index:6;
+    display:flex;align-items:center;gap:14px}
+  button.ctl{background:#13261d;border:1px solid var(--line);color:var(--txt);border-radius:7px;
+    padding:7px 11px;cursor:pointer;font-family:var(--mono);font-size:12px;transition:.15s}
+  button.ctl:hover{border-color:var(--green);color:var(--green)}
+  button.ctl.on{border-color:var(--green);color:var(--green);background:#15301f}
+  #play{width:42px;font-size:13px}
+  #scrub{flex:1;-webkit-appearance:none;appearance:none;height:5px;border-radius:3px;
+    background:linear-gradient(90deg,var(--green) 0%,var(--green) var(--p,0%),#1c3329 var(--p,0%));outline:none}
+  #scrub::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;
+    background:var(--green);cursor:pointer;box-shadow:0 0 8px var(--green)}
+  #scrub::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--green);
+    cursor:pointer;border:none;box-shadow:0 0 8px var(--green)}
+  #frameLbl{font-family:var(--mono);font-size:11.5px;white-space:nowrap;min-width:188px}
+  #frameLbl b{color:var(--green)} #frameLbl .tk{color:var(--teal)}
+  .spd{display:flex;gap:3px}
+  .spd button{padding:5px 7px;font-size:10.5px}
+
+  #loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+    background:var(--bg);z-index:20;color:var(--green);font-family:var(--mono);font-size:13px;letter-spacing:.1em}
+  #hint{position:fixed;bottom:62px;left:50%;transform:translateX(-50%);font-size:10.5px;color:var(--dim);
+    z-index:4;pointer-events:none;transition:opacity 1s;font-family:var(--mono)}
+  @media(max-width:780px){
+    #panel,#feed{display:none} #hud-top{max-width:62vw}
+    #frameLbl{min-width:0;font-size:10px} #controls{gap:8px;padding:9px 10px}
+  }
+</style>
+</head>
+<body>
+<canvas id="scene"></canvas>
+
+<div id="hud-top" class="panel">
+  <div class="title">Verdigraph · 3D Brain Lens</div>
+  <div class="agent" id="agentName">—</div>
+  <div class="bid" id="brainId">brain_id —</div>
+  <div class="inv">Read-only observer (I1–I5). The agent owns cognition — this lens
+    only renders what the bot built. Geometry is for human eyes, not the bot's reasoning.</div>
+</div>
+
+<div id="panel" class="panel">
+  <h3>Developmental State</h3>
+  <div class="stat"><span class="k">phase</span><span class="v hl" id="sPhase">genome</span></div>
+  <div class="stat"><span class="k">nodes (cognitive)</span><span class="v" id="sNodes">0</span></div>
+  <div class="stat"><span class="k">edges (synaptic)</span><span class="v" id="sEdges">0</span></div>
+  <div class="stat"><span class="k">specialists grown</span><span class="v" id="sSpec">0</span></div>
+  <div class="stat"><span class="k">avg edge weight</span><span class="v" id="sWeight">—</span></div>
+  <div class="stat"><span class="k">Σ wiring length</span><span class="v" id="sWire">—</span></div>
+  <div class="stat"><span class="k">ledger events</span><span class="v" id="sLedger">0</span></div>
+  <div id="sel"><div class="empty">Click a node to inspect it.</div></div>
+  <div class="legend" id="legend"></div>
+</div>
+
+<div id="feed" class="panel">
+  <h3>Developmental Ledger <span style="color:var(--dim);font-weight:400">· append-only</span></h3>
+  <div id="feed-list"></div>
+</div>
+
+<div id="controls" class="panel">
+  <button class="ctl" id="play">▶</button>
+  <button class="ctl" id="step">⤓ step</button>
+  <input type="range" id="scrub" min="0" max="0" value="0" step="1">
+  <span id="frameLbl">frame <b>0</b>/0</span>
+  <div class="spd">
+    <button class="ctl" data-spd="0.5">0.5×</button>
+    <button class="ctl on" data-spd="1">1×</button>
+    <button class="ctl" data-spd="2">2×</button>
+    <button class="ctl" data-spd="4">4×</button>
+  </div>
+  <button class="ctl on" id="rotate">⟳ auto</button>
+</div>
+
+<div id="hint">drag to orbit · scroll to zoom · click a node</div>
+<div id="loading">building brain…</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+"use strict";
+const DATA = __BRAIN_DATA__;
+
+/* ====================================================================
+   Verdigraph 3D Brain Lens — v1
+   A read-only observability layer. Consumes a frame-by-frame snapshot of
+   a DevelopmentalAgent's CognitiveGraph + DevelopmentalLedger and renders
+   it as a 3D structure that develops over time.
+
+   Invariants honored:
+     I1  the viewer never writes back to agent data — DATA is read-only.
+     I2  pure consumer of frames/ledger; no agent runtime here.
+     I3  layout is a deterministic function of brain_id (seeded PRNG).
+     I4  one ledger drives both scrub (replay) and the live feed.
+     I5  geometry is display-only — no wiring cost feeds back into growth.
+   ==================================================================== */
+
+/* ---- deterministic PRNG seeded from brain_id (invariant I3) ---------- */
+function hashStr(s){let h=2166136261>>>0;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const RNG = mulberry32(hashStr(DATA.meta.brain_id || DATA.meta.agent_name || "verdigraph"));
+
+const PROTECTED = new Set(DATA.genome.protected_nodes || []);
+const INITIAL   = new Set(DATA.genome.initial_nodes || []);
+
+/* ---- build the union graph (every node/edge that ever exists) -------- */
+const uNodes = new Map();   // id -> {id,type,firstFrame,isProtected,isInitial}
+const uEdges = new Map();   // "a->b" -> {id,from,to,firstFrame}
+DATA.frames.forEach(fr=>{
+  const g = fr.graph;
+  for(const id in g.nodes){
+    if(!uNodes.has(id)){
+      const n = g.nodes[id];
+      uNodes.set(id,{id, type:n.type||"module", firstFrame:fr.index,
+        isProtected:PROTECTED.has(id), isInitial:INITIAL.has(id),
+        isSpecialist:(n.type==="specialist")||id.endsWith("_specialist")});
+    }
+  }
+  for(const key in g.edges){
+    if(!uEdges.has(key)){
+      const e = g.edges[key];
+      uEdges.set(key,{id:key, from:e.from_node, to:e.to_node, firstFrame:fr.index});
+    }
+  }
+});
+
+/* observed weight range, for visual normalization */
+let wMin=1, wMax=0;
+DATA.frames.forEach(fr=>{for(const k in fr.graph.edges){const w=fr.graph.edges[k].weight;
+  if(w<wMin)wMin=w; if(w>wMax)wMax=w;}});
+if(wMax-wMin < 1e-6){wMin=0;wMax=1;}
+const wNorm = w => Math.max(0,Math.min(1,(w-wMin)/(wMax-wMin)));
+
+/* ====================================================================
+   3D force-directed layout — computed ONCE, deterministically (I3).
+   ==================================================================== */
+function computeLayout(){
+  const ids=[...uNodes.keys()];
+  const pos={}, vel={};
+  ids.forEach(id=>{
+    // seeded point on a shell
+    const u=RNG()*2-1, th=RNG()*Math.PI*2, r=46+RNG()*16, s=Math.sqrt(1-u*u);
+    pos[id]=new THREE.Vector3(r*s*Math.cos(th), r*u*0.85, r*s*Math.sin(th));
+    vel[id]=new THREE.Vector3();
+  });
+  const edges=[...uEdges.values()];
+  const REST=27, KREP=2600, KSPR=0.085, CENTER=0.012, DAMP=0.82;
+  const tmp=new THREE.Vector3();
+  for(let it=0; it<520; it++){
+    // repulsion (all pairs)
+    for(let i=0;i<ids.length;i++)for(let j=i+1;j<ids.length;j++){
+      const a=pos[ids[i]], b=pos[ids[j]];
+      tmp.subVectors(a,b); let d=tmp.length()||0.01;
+      const f=KREP/(d*d); tmp.multiplyScalar(f/d);
+      vel[ids[i]].add(tmp); vel[ids[j]].sub(tmp);
+    }
+    // springs along edges
+    edges.forEach(e=>{
+      const a=pos[e.from], b=pos[e.to]; if(!a||!b)return;
+      tmp.subVectors(b,a); const d=tmp.length()||0.01;
+      tmp.multiplyScalar(KSPR*(d-REST)/d);
+      vel[e.from].add(tmp); vel[e.to].sub(tmp);
+    });
+    // centering + integrate
+    ids.forEach(id=>{
+      tmp.copy(pos[id]).multiplyScalar(-CENTER);
+      vel[id].add(tmp).multiplyScalar(DAMP);
+      pos[id].add(vel[id]);
+    });
+  }
+  // recentre on origin
+  const c=new THREE.Vector3();
+  ids.forEach(id=>c.add(pos[id])); c.multiplyScalar(1/ids.length);
+  ids.forEach(id=>pos[id].sub(c));
+  return pos;
+}
+const POS = computeLayout();
+
+/* ====================================================================
+   Three.js scene
+   ==================================================================== */
+const canvas=document.getElementById("scene");
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x0a1410);
+scene.fog=new THREE.FogExp2(0x0a1410,0.0042);
+const camera=new THREE.PerspectiveCamera(52,1,0.1,2000);
+camera.position.set(0,8,148);
+
+const brain=new THREE.Group(); scene.add(brain);
+
+scene.add(new THREE.AmbientLight(0x4a6b5e,0.85));
+const key=new THREE.PointLight(0x9fe8c0,1.05,0); key.position.set(80,90,110); scene.add(key);
+const rim=new THREE.PointLight(0x3fb8c4,0.65,0); rim.position.set(-110,-40,-70); scene.add(rim);
+
+/* starfield-ish depth dust */
+(function(){
+  const g=new THREE.BufferGeometry(), N=420, p=new Float32Array(N*3);
+  for(let i=0;i<N*3;i++) p[i]=(RNG()*2-1)*620;
+  g.setAttribute("position",new THREE.BufferAttribute(p,3));
+  scene.add(new THREE.Points(g,new THREE.PointsMaterial({color:0x1d3a2e,size:1.4,sizeAttenuation:true})));
+})();
+
+/* ---- shared textures ------------------------------------------------ */
+function glowTexture(){
+  const c=document.createElement("canvas"); c.width=c.height=128;
+  const x=c.getContext("2d"), g=x.createRadialGradient(64,64,0,64,64,64);
+  g.addColorStop(0,"rgba(255,255,255,1)"); g.addColorStop(.35,"rgba(255,255,255,.55)");
+  g.addColorStop(1,"rgba(255,255,255,0)");
+  x.fillStyle=g; x.fillRect(0,0,128,128);
+  const t=new THREE.Texture(c); t.needsUpdate=true; return t;
+}
+const GLOW=glowTexture();
+
+function labelSprite(text){
+  const pad=8, c=document.createElement("canvas"), x=c.getContext("2d");
+  const fs=42; x.font=`600 ${fs}px -apple-system,Segoe UI,Roboto,sans-serif`;
+  const w=x.measureText(text).width;
+  c.width=w+pad*2; c.height=fs+pad*2;
+  x.font=`600 ${fs}px -apple-system,Segoe UI,Roboto,sans-serif`;
+  x.fillStyle="rgba(207,230,218,.96)"; x.textBaseline="middle";
+  x.fillText(text,pad,c.height/2);
+  const t=new THREE.Texture(c); t.needsUpdate=true;
+  const m=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthTest:false}));
+  m.scale.set(c.width/c.height*4.4,4.4,1);
+  m.userData.aspect=c.width/c.height;
+  return m;
+}
+
+const COL={
+  initial:new THREE.Color(0x3fb8c4),
+  specialist:new THREE.Color(0x5fd86a),
+  protected:new THREE.Color(0xe8b84b),
+  orphan:new THREE.Color(0x5a6b62),
+};
+function baseColor(n){
+  if(n.isProtected) return COL.protected;
+  if(n.isSpecialist) return COL.specialist;
+  return COL.initial;
+}
+
+/* ---- node objects --------------------------------------------------- */
+const nodeObjs=new Map();   // id -> {node,mesh,glow,label,disp,target,pulse}
+uNodes.forEach(n=>{
+  const col=baseColor(n);
+  const mat=new THREE.MeshPhongMaterial({color:col,emissive:col.clone().multiplyScalar(0.4),
+    shininess:60,transparent:true,opacity:0});
+  const mesh=new THREE.Mesh(new THREE.SphereGeometry(1,30,30),mat);
+  mesh.position.copy(POS[n.id]); mesh.userData.id=n.id; brain.add(mesh);
+
+  const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:GLOW,color:col,
+    transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false}));
+  glow.position.copy(POS[n.id]); brain.add(glow);
+
+  const label=labelSprite(n.id); label.position.copy(POS[n.id]);
+  label.material.opacity=0; brain.add(label);
+
+  nodeObjs.set(n.id,{node:n,mesh,glow,label,
+    disp:{op:0,scale:0.01}, target:{op:0,scale:1}, pulse:0, pulseCol:COL.specialist});
+});
+
+/* ---- edge objects (cylinders; node positions are frozen) ------------ */
+const edgeGeo=new THREE.CylinderGeometry(1,1,1,10,1,true);
+const edgeObjs=new Map();
+const UP=new THREE.Vector3(0,1,0);
+uEdges.forEach(e=>{
+  const a=POS[e.from], b=POS[e.to]; if(!a||!b)return;
+  const mid=a.clone().add(b).multiplyScalar(0.5);
+  const dir=b.clone().sub(a); const len=dir.length();
+  const mat=new THREE.MeshPhongMaterial({color:0x4fd86a,emissive:0x162b1f,
+    transparent:true,opacity:0});
+  const mesh=new THREE.Mesh(edgeGeo,mat);
+  mesh.position.copy(mid);
+  mesh.quaternion.setFromUnitVectors(UP,dir.clone().normalize());
+  mesh.scale.set(0.2,len,0.2);
+  brain.add(mesh);
+  edgeObjs.set(e.id,{edge:e,mesh,len,disp:{op:0,rad:0.2},target:{op:0,rad:0.2},pulse:0,pulseCol:COL.specialist});
+});
+
+/* ====================================================================
+   Frame application — translate a snapshot into render targets
+   ==================================================================== */
+const COLW_LO=new THREE.Color(0x9a5238), COLW_HI=new THREE.Color(0x5fd86a);
+let activeSpecialists=0, activeNodes=0, activeEdges=0, avgW=0, wireLen=0;
+
+function applyFrame(idx){
+  const fr=DATA.frames[idx], g=fr.graph;
+  // node degree (this frame) -> orphan detection
+  const deg={};
+  for(const k in g.edges){const e=g.edges[k];deg[e.from_node]=(deg[e.from_node]||0)+1;deg[e.to_node]=(deg[e.to_node]||0)+1;}
+  activeNodes=0; activeSpecialists=0;
+  nodeObjs.forEach((o,id)=>{
+    const present=!!g.nodes[id];
+    if(present){
+      activeNodes++;
+      const n=g.nodes[id];
+      if(o.node.isSpecialist) activeSpecialists++;
+      o.target.op = (deg[id]||0)===0 && !o.node.isProtected && !o.node.isInitial ? 0.34 : 1;
+      const trust=n.trust_score!=null?n.trust_score:0.5;
+      o.target.scale = 1.7 + trust*2.2 + Math.min(n.usage_count||0,40)*0.022;
+      o.curN=n; o.orphan=(deg[id]||0)===0;
+    }else{
+      o.target.op=0; o.target.scale=0.01; o.curN=null;
+    }
+  });
+  // edges
+  activeEdges=0; let wsum=0; wireLen=0;
+  edgeObjs.forEach((o,id)=>{
+    const e=g.edges[id];
+    if(e){
+      activeEdges++;
+      o.target.op=0.92;
+      o.target.rad=0.16 + wNorm(e.weight)*0.92;
+      o.curW=e.weight; wsum+=e.weight; wireLen+=o.len;
+      // weight -> colour
+      o.mesh.material.color.copy(COLW_LO).lerp(COLW_HI,wNorm(e.weight));
+    }else{
+      o.target.op=0; o.target.rad=0.05; o.curW=null;
+    }
+  });
+  avgW = activeEdges? wsum/activeEdges : 0;
+
+  // pulses from this frame's new ledger events (I4)
+  fr.new_events.forEach(ev=>{
+    if(ev.event_type==="node_created"){
+      const nid=ev.payload && ev.payload.node;
+      if(nodeObjs.has(nid)){nodeObjs.get(nid).pulse=1;nodeObjs.get(nid).pulseCol=COL.specialist;}
+      (ev.payload && ev.payload.created_edges||[]).forEach(ek=>{
+        if(edgeObjs.has(ek)){edgeObjs.get(ek).pulse=1;edgeObjs.get(ek).pulseCol=COL.specialist;}});
+    }else if(ev.event_type==="edge_strengthened"||ev.event_type==="edge_weakened"||ev.event_type==="edge_pruned"){
+      const ek=ev.payload && ev.payload.edge;
+      if(edgeObjs.has(ek)){
+        const o=edgeObjs.get(ek); o.pulse=1;
+        o.pulseCol = ev.event_type==="edge_strengthened"?COL.specialist
+                   : ev.event_type==="edge_weakened"?COL.protected:COL.orphan;
+        if(ev.event_type==="edge_pruned") o.pulseCol=new THREE.Color(0xe0584a);
+      }
+    }
+  });
+  updateHUD(fr);
+}
+
+/* ====================================================================
+   HUD
+   ==================================================================== */
+const $=id=>document.getElementById(id);
+$("agentName").textContent=DATA.meta.agent_name;
+$("brainId").textContent="brain_id "+DATA.meta.brain_id;
+
+const EVMETA={
+  agent_initialized:{t:"◆",c:"#cfe6da"}, node_created:{t:"+",c:"#5fd86a"},
+  edge_strengthened:{t:"▲",c:"#5fd86a"}, edge_weakened:{t:"▼",c:"#e8b84b"},
+  edge_pruned:{t:"✕",c:"#e0584a"},
+};
+function updateHUD(fr){
+  $("sPhase").textContent = fr.index===0?"genome (birth)":fr.task_type;
+  $("sNodes").textContent = activeNodes;
+  $("sEdges").textContent = activeEdges;
+  $("sSpec").textContent  = activeSpecialists+" / 5";
+  $("sWeight").textContent= avgW?avgW.toFixed(3):"—";
+  $("sWire").textContent  = wireLen?Math.round(wireLen)+" u":"—";
+  $("sLedger").textContent= fr.graph?cumLedger(fr.index):0;
+  const tk = fr.index===0?"—":(fr.task_id+" · "+fr.task_type);
+  $("frameLbl").innerHTML=`frame <b>${fr.index}</b>/${DATA.frames.length-1} &nbsp;<span class="tk">${tk}</span>`;
+  $("scrub").value=fr.index;
+  $("scrub").style.setProperty("--p",(fr.index/(DATA.frames.length-1)*100)+"%");
+}
+let _cum=[]; (function(){let s=0;DATA.frames.forEach(f=>{s+=f.new_events.length;_cum.push(s);});})();
+function cumLedger(i){return _cum[i];}
+
+/* legend */
+$("legend").innerHTML=[
+  ["#3fb8c4","genome module"],["#5fd86a","grown specialist"],
+  ["#e8b84b","protected (non-plastic)"],["#5a6b62","orphaned / withered"],
+].map(([c,t])=>`<div class="lrow"><span class="dot" style="color:${c};background:${c}"></span>${t}</div>`).join("");
+
+/* ledger feed */
+const feedList=$("feed-list");
+function rebuildFeed(idx){
+  feedList.innerHTML="";
+  let rows=[];
+  for(let i=0;i<=idx;i++){
+    DATA.frames[i].new_events.forEach(ev=>{
+      const m=EVMETA[ev.event_type]||{t:"·",c:"#7c9389"};
+      let detail=ev.event_type.replace(/_/g," ");
+      if(ev.payload){
+        if(ev.payload.node) detail+=" — "+ev.payload.node;
+        else if(ev.payload.edge) detail+=" — "+ev.payload.edge;
+        else if(ev.payload.agent_name) detail+=" — "+ev.payload.agent_name;
+      }
+      rows.push(`<div class="ev"><span class="tag" style="color:${m.c}">${m.t}</span><span class="msg">${detail}</span></div>`);
+    });
+  }
+  feedList.innerHTML=rows.slice(-90).join("");
+  feedList.scrollTop=feedList.scrollHeight;
+}
+
+/* selected-node inspector */
+let selected=null;
+function showNode(id){
+  selected=id;
+  const o=nodeObjs.get(id), n=o&&o.curN;
+  const el=$("sel");
+  if(!n){el.innerHTML=`<div class="nname">${id}</div><div class="ndesc">Not present in this frame — created at frame ${o?o.node.firstFrame:"?"}.</div>`;return;}
+  const role=o.node.isProtected?"protected · non-plastic":o.node.isSpecialist?"grown specialist":"genome module";
+  const col=`#${baseColor(o.node).getHexString()}`;
+  const tot=(n.success_count||0)+(n.failure_count||0);
+  const sr=tot?((n.success_count/tot)*100).toFixed(0)+"%":"—";
+  el.innerHTML=`
+    <div class="nname">${n.id}</div>
+    <div class="ntype" style="color:${col}">${role}</div>
+    <div class="ndesc">${n.description||""}</div>
+    <div class="stat"><span class="k">trust</span><span class="v">${(n.trust_score??0).toFixed(3)}</span></div>
+    <div class="stat"><span class="k">usage</span><span class="v">${n.usage_count||0}</span></div>
+    <div class="stat"><span class="k">success rate</span><span class="v">${sr}</span></div>
+    <div class="stat"><span class="k">born (frame)</span><span class="v">${o.node.firstFrame}</span></div>
+    ${o.orphan?'<div class="ndesc" style="color:#e0584a;margin-top:6px">⚠ orphaned — all pathways pruned.</div>':''}`;
+}
+
+/* ====================================================================
+   Interaction — custom orbit (no external controls dependency)
+   ==================================================================== */
+let drag=false,px=0,py=0,rx=-0.18,ry=0.5,autoRot=true;
+canvas.addEventListener("pointerdown",e=>{drag=true;px=e.clientX;py=e.clientY;});
+addEventListener("pointerup",()=>drag=false);
+addEventListener("pointermove",e=>{
+  if(!drag)return;
+  ry+=(e.clientX-px)*0.006; rx+=(e.clientY-py)*0.006;
+  rx=Math.max(-1.4,Math.min(1.4,rx)); px=e.clientX;py=e.clientY;
+});
+canvas.addEventListener("wheel",e=>{
+  e.preventDefault();
+  camera.position.z=Math.max(56,Math.min(320,camera.position.z+e.deltaY*0.15));
+},{passive:false});
+
+/* click-to-select via raycaster */
+const ray=new THREE.Raycaster(), mouse=new THREE.Vector2();
+let downX=0,downY=0;
+canvas.addEventListener("pointerdown",e=>{downX=e.clientX;downY=e.clientY;});
+canvas.addEventListener("pointerup",e=>{
+  if(Math.abs(e.clientX-downX)>4||Math.abs(e.clientY-downY)>4)return;
+  mouse.x=(e.clientX/innerWidth)*2-1; mouse.y=-(e.clientY/innerHeight)*2+1;
+  ray.setFromCamera(mouse,camera);
+  const meshes=[...nodeObjs.values()].filter(o=>o.disp.op>0.1).map(o=>o.mesh);
+  const hit=ray.intersectObjects(meshes)[0];
+  if(hit) showNode(hit.object.userData.id);
+});
+
+/* ====================================================================
+   Transport controls
+   ==================================================================== */
+let frameIdx=0, playing=false, speed=1, lastAdvance=0;
+const FRAME_MS=620;   // base ms per frame at 1×
+
+function gotoFrame(i,rebuild){
+  frameIdx=Math.max(0,Math.min(DATA.frames.length-1,i));
+  applyFrame(frameIdx);
+  rebuildFeed(frameIdx);
+  if(selected) showNode(selected);
+}
+$("play").addEventListener("click",()=>{
+  playing=!playing;
+  $("play").textContent=playing?"❚❚":"▶";
+  $("play").classList.toggle("on",playing);
+  if(playing&&frameIdx>=DATA.frames.length-1) gotoFrame(0);
+  lastAdvance=performance.now();
+});
+$("step").addEventListener("click",()=>{playing=false;$("play").textContent="▶";$("play").classList.remove("on");
+  gotoFrame(frameIdx+1);});
+$("scrub").addEventListener("input",e=>{playing=false;$("play").textContent="▶";$("play").classList.remove("on");
+  gotoFrame(+e.target.value);});
+document.querySelectorAll("[data-spd]").forEach(b=>b.addEventListener("click",()=>{
+  speed=+b.dataset.spd;
+  document.querySelectorAll("[data-spd]").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on");
+}));
+$("rotate").addEventListener("click",()=>{autoRot=!autoRot;$("rotate").classList.toggle("on",autoRot);});
+addEventListener("keydown",e=>{
+  if(e.code==="Space"){e.preventDefault();$("play").click();}
+  else if(e.code==="ArrowRight"){$("step").click();}
+  else if(e.code==="ArrowLeft"){playing=false;$("play").textContent="▶";$("play").classList.remove("on");gotoFrame(frameIdx-1);}
+});
+
+/* ====================================================================
+   Render loop
+   ==================================================================== */
+function resize(){
+  const w=innerWidth,h=innerHeight;
+  renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix();
+}
+addEventListener("resize",resize); resize();
+
+const tmpScale=new THREE.Vector3();
+function tick(now){
+  // playback advance
+  if(playing && now-lastAdvance > FRAME_MS/speed){
+    lastAdvance=now;
+    if(frameIdx>=DATA.frames.length-1){playing=false;$("play").textContent="▶";$("play").classList.remove("on");}
+    else gotoFrame(frameIdx+1);
+  }
+  // brain rotation
+  if(autoRot && !drag) ry+=0.0016;
+  brain.rotation.y=ry; brain.rotation.x=rx;
+
+  // node interpolation
+  nodeObjs.forEach(o=>{
+    o.disp.op   += (o.target.op-o.disp.op)*0.14;
+    o.disp.scale+= (o.target.scale-o.disp.scale)*0.14;
+    const breathe = 1 + Math.sin(now*0.002 + o.node.firstFrame)*0.025;
+    o.mesh.scale.setScalar(Math.max(0.01,o.disp.scale*breathe));
+    o.mesh.material.opacity=o.disp.op;
+    // pulse -> emissive
+    const base=baseColor(o.node);
+    if(o.pulse>0.001){
+      o.mesh.material.emissive.copy(base).lerp(o.pulseCol,o.pulse*0.9);
+      o.pulse*=0.92;
+    }else{
+      o.mesh.material.emissive.copy(base).multiplyScalar(o.orphan?0.12:0.4);
+    }
+    const gl=o.glow.material;
+    gl.opacity=o.disp.op*(o.orphan?0.12:0.36)+o.pulse*0.5;
+    o.glow.scale.setScalar(Math.max(0.01,o.disp.scale*(3.4+o.pulse*2.2)));
+    o.glow.material.color.copy(base).lerp(o.pulseCol,o.pulse*0.7);
+    // label
+    const sel=(selected===o.node.id);
+    o.label.material.opacity=Math.min(1,o.disp.op*(sel?1:0.62));
+    const ls=(sel?5.4:4.4);
+    o.label.scale.set(ls*o.label.userData.aspect,ls,1);
+    o.label.position.copy(o.mesh.position).y+=o.disp.scale*breathe+3.4;
+  });
+
+  // edge interpolation
+  edgeObjs.forEach(o=>{
+    o.disp.op += (o.target.op-o.disp.op)*0.14;
+    o.disp.rad+= (o.target.rad-o.disp.rad)*0.14;
+    o.mesh.material.opacity=o.disp.op;
+    const r=Math.max(0.01,o.disp.rad*(1+o.pulse*1.1));
+    o.mesh.scale.set(r,o.len,r);
+    if(o.pulse>0.001){
+      o.mesh.material.emissive.copy(o.pulseCol).multiplyScalar(o.pulse*0.8);
+      o.pulse*=0.9;
+    }else{
+      o.mesh.material.emissive.setHex(0x162b1f);
+    }
+  });
+
+  renderer.render(scene,camera);
+  requestAnimationFrame(tick);
+}
+
+/* ---- boot ----------------------------------------------------------- */
+$("scrub").max=DATA.frames.length-1;
+gotoFrame(0,true);
+$("loading").style.display="none";
+setTimeout(()=>{const h=$("hint");if(h)h.style.opacity=0;},5200);
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
