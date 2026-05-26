@@ -1,0 +1,75 @@
+{
+  "title": "Verdigraph NeuroGenesis: A Software Framework for Self-Evolving AI-Agent Cognitive Substrates, with Mechanically Verified Operational Invariants (v0.2.0)",
+  "description": "<p>Verdigraph NeuroGenesis is an open-source software framework for AI-agent-architected, self-evolving cognitive substrates. Version 0.2.0 extends the v0.1.0 deposit with the first mechanically verified Lean 4 proofs of three operational invariants of the substrate: append-only correctness of the developmental ledger, exactness of the publicly-claimed twenty-five-percent net-revenue conservation routing, and invariance of the agent's protected node set under pruning.</p><p>The deposit comprises:</p><ul><li>The complete v0.1.0 source code and three companion papers (PAPER_1 Physical NeuroGenesis, PAPER_2 Verdigraph Digital NeuroGenesis, PAPER_3 Verdigraph Compute Efficiency), carried forward unchanged.</li><li>A new companion paper, <em>PAPER_4: Verdigraph Operational Formalization</em>, reporting the verified invariants and the methodology used to produce them.</li><li>Lean 4 source for three theorem projects (T-VG-01 ledger append-only, T-VG-02 twenty-five-percent conservation share exactness, T-VG-03 pruning protected-set invariance), each with README, scaffold, Aristotle notes, and final proved source.</li><li>Submission and audit trail (<code>lean/verdigraph/SUBMISSIONS.json</code>) including Aristotle project identifiers, run identifiers, and per-run postmortems.</li><li>A scoping document (<code>docs/lean_formalization_scope.md</code>) recording open spec questions and the defaults adopted, supporting reproducibility and future re-runs.</li></ul><p>All twelve theorems across the three projects discharged sorry-free in sixteen minutes of wall-clock time. Each verified to depend only on standard mathematical axioms (<code>propext</code>, <code>Classical.choice</code>, <code>Quot.sound</code>).</p><p>This deposit continues to serve as <strong>defensive prior art</strong>: the framework, the papers, and the proofs are and will remain open source under MIT license. Subsequent patent applications by third parties attempting to claim the disclosed subject matter should be rejected for lack of novelty.</p><p>Reference implementation: <a href=\"https://github.com/viridis-security/verdigraph-neurogenesis\">github.com/viridis-security/verdigraph-neurogenesis</a>.</p>",
+  "creators": [
+    {
+      "name": "Hart, Justin",
+      "affiliation": "Viridis LLC",
+      "orcid": "REPLACE-WITH-YOUR-ORCID-OR-REMOVE-THIS-LINE"
+    },
+    {
+      "name": "Aristotle (Harmonic)",
+      "affiliation": "Harmonic AI"
+    }
+  ],
+  "contributors": [
+    {
+      "name": "Aristotle (Harmonic)",
+      "affiliation": "Harmonic AI",
+      "type": "Other"
+    }
+  ],
+  "keywords": [
+    "artificial intelligence",
+    "AI agents",
+    "agent frameworks",
+    "formal verification",
+    "Lean theorem prover",
+    "Lean 4",
+    "mathlib",
+    "Aristotle theorem prover",
+    "Harmonic AI",
+    "Model Context Protocol",
+    "MCP",
+    "cognitive architecture",
+    "neuromorphic computing",
+    "compute efficiency",
+    "thermodynamic computing",
+    "Intelligence Bound",
+    "Landauer bound",
+    "carbon accounting",
+    "sustainable AI",
+    "conservation technology",
+    "auditable AI",
+    "verified AI",
+    "developmental systems",
+    "self-modifying systems"
+  ],
+  "license": "MIT",
+  "upload_type": "software",
+  "access_right": "open",
+  "publication_date": "2026-05-26",
+  "version": "0.2.0",
+  "language": "eng",
+  "communities": [
+    {"identifier": "open-science"}
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/viridis-security/verdigraph-neurogenesis",
+      "relation": "isSupplementTo",
+      "resource_type": "software"
+    },
+    {
+      "identifier": "https://verdigraph.com",
+      "relation": "isDescribedBy",
+      "resource_type": "other"
+    },
+    {
+      "identifier": "arXiv:2510.01346",
+      "relation": "cites",
+      "resource_type": "publication"
+    }
+  ],
+  "notes": "v0.2.0 is a new version of the v0.1.0 deposit. The v0.2.0 release adds the first mechanically verified Lean 4 proofs of three operational invariants of the Verdigraph substrate (T-VG-01 ledger append-only, T-VG-02 conservation share exactness, T-VG-03 pruning protected-set invariance), produced in sixteen minutes of wall-clock time using Harmonic AI's Aristotle prover. The complete audit trail, including project and run identifiers, is in lean/verdigraph/SUBMISSIONS.json inside the archive."
+}
