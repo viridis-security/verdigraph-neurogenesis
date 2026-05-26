@@ -106,9 +106,9 @@
         "type": "module",
         "description": "Initial genome node: intent_classifier",
         "status": "active",
-        "trust_score": 0.6,
-        "usage_count": 0,
-        "success_count": 0,
+        "trust_score": 0.64,
+        "usage_count": 2,
+        "success_count": 2,
         "failure_count": 0,
         "created_at": "2026-05-18T00:25:08.820230+00:00",
         "metadata": {}
@@ -214,9 +214,9 @@
         "type": "module",
         "description": "Initial genome node: billing_router",
         "status": "active",
-        "trust_score": 0.6,
-        "usage_count": 0,
-        "success_count": 0,
+        "trust_score": 0.64,
+        "usage_count": 2,
+        "success_count": 2,
         "failure_count": 0,
         "created_at": "2026-05-18T00:25:08.820256+00:00",
         "metadata": {}
@@ -226,9 +226,9 @@
         "type": "module",
         "description": "Initial genome node: payment_processor",
         "status": "active",
-        "trust_score": 0.6,
-        "usage_count": 0,
-        "success_count": 0,
+        "trust_score": 0.68,
+        "usage_count": 4,
+        "success_count": 4,
         "failure_count": 0,
         "created_at": "2026-05-18T00:25:08.820257+00:00",
         "metadata": {}
@@ -238,9 +238,9 @@
         "type": "module",
         "description": "Initial genome node: usage_meter",
         "status": "active",
-        "trust_score": 0.6,
-        "usage_count": 0,
-        "success_count": 0,
+        "trust_score": 0.64,
+        "usage_count": 2,
+        "success_count": 2,
         "failure_count": 0,
         "created_at": "2026-05-18T00:25:08.820258+00:00",
         "metadata": {}
@@ -262,9 +262,9 @@
         "type": "module",
         "description": "Initial genome node: conservation_fund_router",
         "status": "active",
-        "trust_score": 0.6,
-        "usage_count": 0,
-        "success_count": 0,
+        "trust_score": 0.64,
+        "usage_count": 2,
+        "success_count": 2,
         "failure_count": 0,
         "created_at": "2026-05-18T00:25:08.820260+00:00",
         "metadata": {}
@@ -286,9 +286,9 @@
         "type": "module",
         "description": "Initial genome node: evaluation_engine",
         "status": "active",
-        "trust_score": 0.6,
-        "usage_count": 0,
-        "success_count": 0,
+        "trust_score": 0.64,
+        "usage_count": 2,
+        "success_count": 2,
         "failure_count": 0,
         "created_at": "2026-05-18T00:25:08.820263+00:00",
         "metadata": {}
@@ -298,9 +298,9 @@
         "type": "module",
         "description": "Initial genome node: ledger",
         "status": "active",
-        "trust_score": 0.6,
-        "usage_count": 0,
-        "success_count": 0,
+        "trust_score": 0.68,
+        "usage_count": 4,
+        "success_count": 4,
         "failure_count": 0,
         "created_at": "2026-05-18T00:25:08.820267+00:00",
         "metadata": {}
@@ -557,6 +557,105 @@
         "agent_name": "Viridis Operator"
       },
       "timestamp": "2026-05-18T00:25:08.820305+00:00"
+    },
+    {
+      "event_type": "conservation_accumulation",
+      "reason": "Daily conservation fund accrual from net completed-payment revenue (calculation only).",
+      "payload": {
+        "line_item": "2026-05-21: $0.00 (25% of $0.00) accumulated for conservation routing.",
+        "date": "2026-05-21",
+        "net_revenue_usd": 0.0,
+        "conservation_usd": 0.0,
+        "window": "rolling_24h"
+      },
+      "timestamp": "2026-05-21T13:15:06.676110+00:00"
+    },
+    {
+      "event_type": "conservation_accumulation",
+      "reason": "Daily conservation fund accrual from net completed-payment revenue (calculation only).",
+      "payload": {
+        "line_item": "2026-05-23: $0.00 (25% of $0.00) accumulated for conservation routing.",
+        "date": "2026-05-23",
+        "net_revenue_usd": 0.0,
+        "conservation_usd": 0.0,
+        "window": "rolling_24h"
+      },
+      "timestamp": "2026-05-23T13:15:36.809152+00:00"
+    },
+    {
+      "event_type": "evaluation_recorded",
+      "reason": "github_metrics: required connector (github-mcp) not bound; data fetch could not be executed.",
+      "payload": {
+        "task": "github_metrics",
+        "success_score": 0.0,
+        "used_nodes": [
+          "intent_classifier",
+          "github_router",
+          "ledger"
+        ],
+        "notes": "github-mcp unavailable in this scheduled run; no PR/issue/star deltas computed."
+      },
+      "timestamp": "2026-05-26T13:12:16.668744+00:00"
+    },
+    {
+      "event_type": "evaluation_recorded",
+      "reason": "billing_reconciliation: required connector (stripe-mcp) not bound; could not enumerate customers/payments/invoices.",
+      "payload": {
+        "task": "billing_reconciliation",
+        "success_score": 0.0,
+        "used_nodes": [
+          "intent_classifier",
+          "billing_router",
+          "payment_processor",
+          "usage_meter",
+          "ledger"
+        ],
+        "notes": "stripe-mcp unavailable; no anomaly scan performed. No writes attempted (safety constraint upheld)."
+      },
+      "timestamp": "2026-05-26T13:12:16.668786+00:00"
+    },
+    {
+      "event_type": "evaluation_recorded",
+      "reason": "conservation_routing: $0 net revenue measurable (Stripe unreachable); accrual recorded as zero, consistent with prior runs on 2026-05-21 and 2026-05-23.",
+      "payload": {
+        "task": "conservation_routing",
+        "success_score": 0.5,
+        "used_nodes": [
+          "payment_processor",
+          "conservation_fund_router",
+          "evaluation_engine",
+          "ledger"
+        ],
+        "notes": "Calculation performed deterministically on observed (zero) revenue; no money movement initiated (calculation-only per spec)."
+      },
+      "timestamp": "2026-05-26T13:12:16.668788+00:00"
+    },
+    {
+      "event_type": "conservation_accumulation",
+      "reason": "Daily conservation fund accrual from net completed-payment revenue (calculation only).",
+      "payload": {
+        "line_item": "2026-05-26: $0.00 (25% of $0.00) accumulated for conservation routing.",
+        "net_revenue_usd": 0.0,
+        "conservation_share_usd": 0.0,
+        "source": "stripe-mcp UNAVAILABLE \u2014 treated as zero observable revenue"
+      },
+      "timestamp": "2026-05-26T13:12:16.668790+00:00"
+    },
+    {
+      "event_type": "operator_flag",
+      "reason": "Scheduled daily run could not contact verdigraph-mcp, github-mcp, or stripe-mcp. Manual reconnection required.",
+      "payload": {
+        "missing_connectors": [
+          "verdigraph-mcp",
+          "github-mcp",
+          "stripe-mcp"
+        ],
+        "recommended_action": "Reconnect MCPs in Cowork settings; re-run scheduled task to refresh metrics and billing reconciliation.",
+        "github_issue_recommended": true,
+        "github_issue_filed": false,
+        "github_issue_blocked_reason": "github-mcp unavailable; cannot file issue programmatically."
+      },
+      "timestamp": "2026-05-26T13:12:16.668791+00:00"
     }
   ]
 }

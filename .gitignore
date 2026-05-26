@@ -24,3 +24,12 @@ docs/internal/
 
 # Zenodo deposit staging — build artifact, regenerated as needed
 zenodo_deposit/
+
+# Operator agent state backups — per-run snapshots, not source of truth
+verdigraph_state/*.bak-*
+
+# Cowork-imported scaffold (project instructions live in CLAUDE.md, not here)
+AGENTS.md
+
+# PR drafts — local scratch, opened manually
+pr-drafts/
