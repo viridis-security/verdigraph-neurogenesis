@@ -1,0 +1,43 @@
+{
+  "submitted_at": "2026-05-26T16:33:00Z",
+  "submitter": "viridis-operator",
+  "spec_defaults_doc": "docs/lean_formalization_scope.md",
+  "submissions": [
+    {
+      "label": "T-VG-01",
+      "ok": true,
+      "project_id": "bd6acabd-1504-42d3-9272-2cde84829ee7",
+      "status": 2,
+      "run_id": "aa3abc46-7fbd-41ef-b382-95860a5e08f8",
+      "completed_at": "2026-05-26T16:47:51Z",
+      "sorries_remaining": 0,
+      "new_axioms": 0,
+      "signatures_unchanged": true
+    },
+    {
+      "label": "T-VG-02",
+      "ok": true,
+      "project_id": "36d1244f-72b1-4879-9b20-c7426b5b3fdb",
+      "status": 2,
+      "run_id": "27884c66-7f7c-43e4-b563-06204166cdfa",
+      "completed_at": "2026-05-26T16:41:10Z",
+      "sorries_remaining": 0,
+      "new_axioms": 0,
+      "signatures_unchanged": true
+    },
+    {
+      "label": "T-VG-03",
+      "ok": true,
+      "project_id": "445ce0c3-923f-4561-b30f-6f191dde3873",
+      "status": 2,
+      "run_id": "0f319ca9-a854-48af-a0ab-374952162903",
+      "completed_at": "2026-05-26T16:49:38Z",
+      "sorries_remaining": 0,
+      "new_axioms": 0,
+      "signatures_unchanged": true
+    }
+  ],
+  "all_completed_at": "2026-05-26T16:49:38Z",
+  "total_wall_clock": "16 minutes",
+  "audit_summary": "All three projects: 0 sorries, 0 new axioms, signatures unchanged (T-VG-03 syntactic protected\u2192\u00abprotected\u00bb fix disclosed and verified semantic-preserving)."
+}
