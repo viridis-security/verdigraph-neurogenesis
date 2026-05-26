@@ -1,11 +1,13 @@
 # verdigraph-neurogenesis
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20400274.svg)](https://doi.org/10.5281/zenodo.20400274)
+
+
 > Clone this repo, run one script, and within 60 seconds you're building **deterministic, content-addressed brain artifacts** from any agent file — Claude project export, OpenAI Assistant config, raw prompt list, or Verdigraph genome JSON. Pure Python core; zero external services required.
 
 [![python](https://img.shields.io/badge/python-3.10+-blue?style=flat-square)](https://www.python.org)
 [![tests](https://img.shields.io/badge/tests-python%20%C2%B7%20typescript-success?style=flat-square)](#run-the-tests)
 [![license](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20261687.svg)](https://doi.org/10.5281/zenodo.20261687)
 
 ---
 
@@ -212,7 +214,6 @@ In `papers/`:
 
 To cite:
 
-> Hart, Justin. (2026). *Verdigraph NeuroGenesis: A Software Framework for Self-Evolving AI-Agent Cognitive Substrates* (Version 0.1.0). Zenodo. https://doi.org/10.5281/zenodo.20261687
 
 ---
 
