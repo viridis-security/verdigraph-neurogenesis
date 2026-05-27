@@ -26,7 +26,7 @@ export const SafetyAxiomsSchema = z.object({
   disallow_hidden_nodes:            z.boolean().default(true),
   disallow_pruning_protected_nodes: z.boolean().default(true),
   require_purpose_for_new_nodes:    z.boolean().default(true),
-  custom: z.record(z.unknown()).default({}),
+  custom: z.record(z.string(), z.unknown()).default({}),
 });
 export type SafetyAxioms = z.infer<typeof SafetyAxiomsSchema>;
 
@@ -38,7 +38,7 @@ export const AgentGenomeInputSchema = z.object({
   fitness_metrics:  z.array(z.string().min(1)).min(1),
   growth_rules:     GrowthRulesSchema.optional(),
   safety_axioms:    SafetyAxiomsSchema.optional(),
-  metadata:         z.record(z.unknown()).default({}),
+  metadata:         z.record(z.string(), z.unknown()).default({}),
 }).superRefine((data, ctx) => {
   const seen = new Set<string>();
   for (const id of data.initial_nodes) {

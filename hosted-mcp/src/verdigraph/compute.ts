@@ -16,7 +16,7 @@ export const ComputeProfileSchema = z.object({
   gpu_memory_gb:            z.number().min(0).default(0),
   max_context_tokens:       z.number().int().min(1).default(4096),
   local:                    z.boolean().default(false),
-  metadata:                 z.record(z.unknown()).default({}),
+  metadata:                 z.record(z.string(), z.unknown()).default({}),
 });
 export type ComputeProfile = z.infer<typeof ComputeProfileSchema>;
 
@@ -29,7 +29,7 @@ export const TaskProfileSchema = z.object({
   expected_output_tokens: z.number().int().min(0).default(500),
   min_quality:            z.number().min(0).max(1).default(0.5),
   requires_local:         z.boolean().default(false),
-  metadata:               z.record(z.unknown()).default({}),
+  metadata:               z.record(z.string(), z.unknown()).default({}),
 });
 export type TaskProfile = z.infer<typeof TaskProfileSchema>;
 

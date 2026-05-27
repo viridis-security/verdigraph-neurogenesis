@@ -60,7 +60,7 @@ export const BrainNodeSchema = z.object({
   success_count:  z.number().int().min(0).default(0),
   failure_count:  z.number().int().min(0).default(0),
   created_at:     z.string(),
-  metadata:       z.record(z.unknown()).default({}),
+  metadata:       z.record(z.string(), z.unknown()).default({}),
 });
 export type BrainNode = z.infer<typeof BrainNodeSchema>;
 
@@ -77,7 +77,7 @@ export const BrainEdgeSchema = z.object({
   risk_score:    z.number().min(0).max(1).default(1.0),
   decay_rate:    z.number().min(0).max(1).default(0.01),
   last_used:     z.string(),
-  metadata:      z.record(z.unknown()).default({}),
+  metadata:      z.record(z.string(), z.unknown()).default({}),
 });
 export type BrainEdge = z.infer<typeof BrainEdgeSchema>;
 
@@ -105,7 +105,7 @@ export const BrainGenomeSchema = z.object({
     disallow_hidden_nodes:            z.boolean(),
     disallow_pruning_protected_nodes: z.boolean(),
     require_purpose_for_new_nodes:    z.boolean(),
-    custom:                           z.record(z.unknown()).default({}),
+    custom:                           z.record(z.string(), z.unknown()).default({}),
   }),
 });
 export type BrainGenome = z.infer<typeof BrainGenomeSchema>;

@@ -76,7 +76,7 @@ export class VerdigraphAgent extends McpAgent<Env, unknown, AuthCtx> {
     const tool = <S extends ZodRawShape>(
       name: string,
       schema: S,
-      body: (args: z.objectOutputType<S, z.ZodTypeAny>) => Promise<unknown>,
+      body: (args: z.infer<z.ZodObject<S>>) => Promise<unknown>,
     ) => {
       (this.server.tool as any)(
         name,
@@ -116,7 +116,7 @@ export class VerdigraphAgent extends McpAgent<Env, unknown, AuthCtx> {
     const freeTool = <S extends ZodRawShape>(
       name: string,
       schema: S,
-      body: (args: z.objectOutputType<S, z.ZodTypeAny>) => Promise<unknown>,
+      body: (args: z.infer<z.ZodObject<S>>) => Promise<unknown>,
     ) => {
       (this.server.tool as any)(name, schema as any, async (args: any) => {
         try {

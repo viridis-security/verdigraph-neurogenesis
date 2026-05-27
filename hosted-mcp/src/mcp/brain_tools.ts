@@ -21,7 +21,7 @@ import { SUPPORTED_FORMATS, BrainInputFormat } from "../brainbuilder/schema";
 type ToolFn = <S extends ZodRawShape>(
   name: string,
   schema: S,
-  body: (args: z.objectOutputType<S, z.ZodTypeAny>) => Promise<unknown>,
+  body: (args: z.infer<z.ZodObject<S>>) => Promise<unknown>,
 ) => void;
 
 interface Bindings {
