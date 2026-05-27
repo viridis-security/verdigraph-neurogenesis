@@ -1,0 +1,67 @@
+name: deploy
+
+# Deploys hosted-mcp to Cloudflare Workers.
+#
+# Triggers
+#   - workflow_dispatch (manual)
+#   - push to iter4/phase-0-blockers or main, when the most recent `tests`
+#     workflow run for that SHA was successful (the workflow itself checks
+#     `wrangler deploy` runs cleanly; CF token presence is required).
+#
+# Required repository secret
+#   CLOUDFLARE_API_TOKEN  -- token with "Edit Cloudflare Workers" permission.
+#                            See https://developers.cloudflare.com/workers/wrangler/ci-cd/
+#
+# Like maxwells-defense's release.yml, the deploy step skips gracefully when
+# the token is absent, so the workflow stays green before the secret exists
+# and can be enabled simply by adding the secret.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, "iter4/phase-0-blockers"]
+    paths:
+      - "hosted-mcp/**"
+      - ".github/workflows/deploy.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: deploy hosted-mcp -> Cloudflare Workers
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install hosted-mcp dependencies
+        working-directory: hosted-mcp
+        run: npm ci --no-audit --no-fund
+
+      - name: Typecheck
+        working-directory: hosted-mcp
+        run: npm run typecheck
+
+      - name: Test
+        working-directory: hosted-mcp
+        run: npm test
+
+      - name: Deploy via wrangler
+        if: ${{ env.CLOUDFLARE_API_TOKEN != '' }}
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ env.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: hosted-mcp
+          command: deploy
+
+      - name: CLOUDFLARE_API_TOKEN absent
+        if: ${{ env.CLOUDFLARE_API_TOKEN == '' }}
+        run: |
+          echo "::warning::CLOUDFLARE_API_TOKEN secret not set — built + typechecked + tested, did not deploy."
+          echo "::warning::Add a CF token (perms: Edit Cloudflare Workers) at Settings -> Secrets -> Actions to enable auto-deploy."

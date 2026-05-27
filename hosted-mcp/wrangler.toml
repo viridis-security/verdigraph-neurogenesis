@@ -6,6 +6,9 @@ main = "src/index.ts"
 compatibility_date = "2026-05-01"
 compatibility_flags = ["nodejs_compat"]
 
+# Serve at verdigraph-mcp.hartjustin6.workers.dev until verdigraph.dev zone is onboarded.
+workers_dev = true
+
 # ─── Custom-domain routes (top-level — verdigraph.dev zone under Cloudflare) ─
 routes = [
   { pattern = "verdigraph.dev", custom_domain = true },
