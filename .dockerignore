@@ -1,0 +1,47 @@
+# Glama / Docker build context — exclude everything not needed to install + start
+# the stdio MCP server.
+
+# Version control
+.git
+.gitignore
+.github
+
+# Local virtualenvs / build artifacts
+.venv
+venv
+*.egg-info
+build
+dist
+__pycache__
+*.pyc
+*.pyo
+
+# Tests and examples (Glama doesn't run them inside the image)
+tests
+examples
+
+# Heavy / non-essential dirs
+papers
+docs
+hosted-mcp
+verdigraph_state
+scripts
+poc-uploads
+
+# Top-level markdown that isn't pyproject's `readme = "README.md"`
+ADOPTION_HANDOFF.md
+CHANGELOG.md
+CONTRIBUTING.md
+LAUNCH_POSTS.md
+REGISTRY_SUBMISSION_KIT.md
+VISION.md
+quickstart.sh
+
+# Editor and OS noise
+.idea
+.vscode
+.DS_Store
+
+# This file itself
+.dockerignore
+Dockerfile

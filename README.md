@@ -6,6 +6,7 @@
 [![tests](https://img.shields.io/badge/tests-python%20%C2%B7%20typescript-success?style=flat-square)](#run-the-tests)
 [![license](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20261687.svg)](https://doi.org/10.5281/zenodo.20261687)
+[![Glama](https://glama.ai/mcp/servers/viridis-security/verdigraph-neurogenesis/badges/score.svg)](https://glama.ai/mcp/servers/viridis-security/verdigraph-neurogenesis)
 
 ---
 
