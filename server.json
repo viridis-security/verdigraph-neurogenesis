@@ -1,0 +1,58 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.viridis-security/verdigraph-neurogenesis",
+  "description": "Paid hosted MCP for agent-to-agent compute routing and brain-builder workflows. OAuth 2.1 + PKCE auth, Stripe prepaid USD credits, 29 tools (10 free, 19 metered). 25% of net revenue funds verified conservation via a public auditable ledger. Three core invariants machine-checked in Lean 4 via Aristotle (ledger append-only, conservation-share exact, pruning preserves protected nodes).",
+  "version": "0.1.0",
+  "repository": {
+    "url": "https://github.com/viridis-security/verdigraph-neurogenesis",
+    "source": "github"
+  },
+  "websiteUrl": "https://verdigraph.dev",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://verdigraph.dev/mcp",
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "Bearer token from OAuth 2.1 + PKCE flow with Dynamic Client Registration. Discover at https://verdigraph.dev/.well-known/oauth-authorization-server",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
+    }
+  ],
+  "packages": [
+    {
+      "registryType": "github",
+      "registryBaseUrl": "https://github.com",
+      "identifier": "viridis-security/verdigraph-neurogenesis",
+      "version": "0.1.0",
+      "transport": {
+        "type": "stdio",
+        "command": "verdigraph-mcp",
+        "args": []
+      },
+      "installationInstructions": "git clone https://github.com/viridis-security/verdigraph-neurogenesis && cd verdigraph-neurogenesis && pip install -e '.[mcp]' && verdigraph-mcp"
+    }
+  ],
+  "_meta": {
+    "io.github.viridis-security/verdigraph-neurogenesis/v1": {
+      "category": [
+        "agent-orchestration",
+        "knowledge-and-memory",
+        "ai-and-machine-learning"
+      ],
+      "hosting": "hybrid",
+      "language": "typescript",
+      "license": "MIT",
+      "doi": "10.5281/zenodo.20261687",
+      "lean_verified_invariants": [
+        "T-VG-01 ledger-append-only (4/4 proved via Aristotle)",
+        "T-VG-02 conservation-share (5/5 proved via Aristotle)",
+        "T-VG-03 pruning-protected (4/4 proved via Aristotle)"
+      ],
+      "glama_listing": "https://glama.ai/mcp/servers/viridis-security/verdigraph-neurogenesis"
+    }
+  }
+}
