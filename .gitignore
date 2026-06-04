@@ -33,3 +33,6 @@ AGENTS.md
 
 # PR drafts — local scratch, opened manually
 pr-drafts/
+
+# internal scorecard — contains security notes; never publish
+STATUS.md

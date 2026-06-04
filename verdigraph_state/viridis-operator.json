@@ -656,6 +656,434 @@
         "github_issue_blocked_reason": "github-mcp unavailable; cannot file issue programmatically."
       },
       "timestamp": "2026-05-26T13:12:16.668791+00:00"
+    },
+    {
+      "event_type": "scheduled_run_started",
+      "reason": "Daily metrics + billing reconciliation scheduled task.",
+      "payload": {
+        "date": "2026-05-28",
+        "task": "verdigraph-daily-metrics-and-billing"
+      },
+      "timestamp": "2026-05-28T13:00:00+00:00"
+    },
+    {
+      "event_type": "evaluation_recorded",
+      "reason": "github_metrics: data fetch impossible \u2014 github-mcp unavailable for 4th consecutive run.",
+      "payload": {
+        "task": "github_metrics",
+        "success_score": 0.0,
+        "used_nodes": [
+          "intent_classifier",
+          "github_router",
+          "ledger"
+        ],
+        "notes": "No GitHub metrics fetched. Run aborted at github_router stage."
+      },
+      "timestamp": "2026-05-28T13:00:00+00:00"
+    },
+    {
+      "event_type": "evaluation_recorded",
+      "reason": "billing_reconciliation: Stripe unreachable; no payments observed.",
+      "payload": {
+        "task": "billing_reconciliation",
+        "success_score": 0.0,
+        "used_nodes": [
+          "intent_classifier",
+          "billing_router",
+          "payment_processor",
+          "usage_meter",
+          "ledger"
+        ],
+        "notes": "Cannot enumerate customers/payment_intents/invoices. No anomalies detected (no data)."
+      },
+      "timestamp": "2026-05-28T13:00:00+00:00"
+    },
+    {
+      "event_type": "evaluation_recorded",
+      "reason": "conservation_routing: $0 net revenue measurable (Stripe unreachable); accrual recorded as zero, consistent with prior runs on 2026-05-21, -23, -26.",
+      "payload": {
+        "task": "conservation_routing",
+        "success_score": 0.5,
+        "used_nodes": [
+          "payment_processor",
+          "conservation_fund_router",
+          "evaluation_engine",
+          "ledger"
+        ],
+        "notes": "Calculation performed deterministically on observed (zero) revenue; no money movement initiated (calculation-only per spec)."
+      },
+      "timestamp": "2026-05-28T13:00:00+00:00"
+    },
+    {
+      "event_type": "conservation_accumulation",
+      "reason": "Daily conservation fund accrual from net completed-payment revenue (calculation only).",
+      "payload": {
+        "line_item": "2026-05-28: $0.00 (25% of $0.00) accumulated for conservation routing.",
+        "net_revenue_usd": 0.0,
+        "conservation_share_usd": 0.0,
+        "source": "stripe-mcp UNAVAILABLE \u2014 treated as zero observable revenue"
+      },
+      "timestamp": "2026-05-28T13:00:00+00:00"
+    },
+    {
+      "event_type": "operator_flag",
+      "reason": "4th consecutive scheduled run unable to contact verdigraph-mcp, github-mcp, or stripe-mcp. Manual reconnection required; recommend pausing schedule until MCPs are wired.",
+      "payload": {
+        "missing_connectors": [
+          "verdigraph-mcp",
+          "github-mcp",
+          "stripe-mcp"
+        ],
+        "recommended_action": "Reconnect MCPs in Cowork settings OR pause this scheduled task until the hosted verdigraph-mcp on Cloudflare is provisioned.",
+        "github_issue_recommended": true,
+        "github_issue_filed": false,
+        "github_issue_blocked_reason": "github-mcp unavailable; cannot file issue programmatically.",
+        "consecutive_failed_runs": 4,
+        "first_failed_run": "2026-05-21"
+      },
+      "timestamp": "2026-05-28T13:00:00+00:00"
+    },
+    {
+      "event_type": "scheduled_run_completed",
+      "reason": "Scheduled run completed with degraded state save only.",
+      "payload": {
+        "date": "2026-05-28",
+        "outcome": "no_metrics_no_billing_state_saved"
+      },
+      "timestamp": "2026-05-28T13:00:00+00:00"
+    },
+    {
+      "event_type": "scheduled_run_started",
+      "reason": "Daily metrics sync + payment reconciliation scheduled run.",
+      "payload": {
+        "date": "2026-06-04",
+        "required_connectors": [
+          "verdigraph-mcp",
+          "github-mcp",
+          "stripe-mcp"
+        ]
+      },
+      "timestamp": "2026-06-04T13:00:00+00:00"
+    },
+    {
+      "event_type": "evaluation_recorded",
+      "reason": "github_metrics: required connector (github-mcp) not bound; data fetch could not be executed.",
+      "payload": {
+        "task": "github_metrics",
+        "success_score": 0.0,
+        "used_nodes": [
+          "intent_classifier",
+          "github_router",
+          "ledger"
+        ],
+        "notes": "github-mcp unavailable; no issue/PR/star/fork/contributor deltas computed."
+      },
+      "timestamp": "2026-06-04T13:00:00+00:00"
+    },
+    {
+      "event_type": "evaluation_recorded",
+      "reason": "billing_reconciliation: required connector (stripe-mcp) not bound; livemode fetch could not be executed.",
+      "payload": {
+        "task": "billing_reconciliation",
+        "success_score": 0.0,
+        "used_nodes": [
+          "intent_classifier",
+          "billing_router",
+          "payment_processor",
+          "usage_meter",
+          "ledger"
+        ],
+        "notes": "stripe-mcp unavailable for acct_1BLyFZDTpwaqE8Ss. Only an unrelated PayPal connector was present; NOT substituted (different system, would corrupt reconciliation). No customers/payment_intents/invoices tallied."
+      },
+      "timestamp": "2026-06-04T13:00:00+00:00"
+    },
+    {
+      "event_type": "evaluation_recorded",
+      "reason": "conservation_routing: calculation ran but on unobservable revenue (stripe-mcp absent); degraded input.",
+      "payload": {
+        "task": "conservation_routing",
+        "success_score": 0.3,
+        "used_nodes": [
+          "payment_processor",
+          "conservation_fund_router",
+          "evaluation_engine",
+          "ledger"
+        ],
+        "notes": "25% rule applied to $0.00 net revenue because billing data was unobservable, not confirmed-zero. Calculation-only; no payout/transfer initiated."
+      },
+      "timestamp": "2026-06-04T13:00:00+00:00"
+    },
+    {
+      "event_type": "conservation_accumulation",
+      "reason": "Daily conservation fund accrual (calculation only; no money movement).",
+      "payload": {
+        "ledger_line": "2026-06-04: $0.00 (25% of $0.00) accumulated for conservation routing.",
+        "net_revenue_usd": 0.0,
+        "conservation_share_usd": 0.0,
+        "source": "stripe-mcp UNAVAILABLE \u2014 treated as zero observable revenue"
+      },
+      "timestamp": "2026-06-04T13:00:00+00:00"
+    },
+    {
+      "event_type": "operator_flag",
+      "reason": "5th consecutive scheduled run unable to contact verdigraph-mcp, github-mcp, or stripe-mcp. Manual reconnection required; recommend pausing schedule until MCPs are wired.",
+      "payload": {
+        "missing_connectors": [
+          "verdigraph-mcp",
+          "github-mcp",
+          "stripe-mcp"
+        ],
+        "recommended_action": "Reconnect MCPs in Cowork settings OR provision the hosted verdigraph-mcp on Cloudflare; then resume schedule.",
+        "github_issue_recommended": true,
+        "github_issue_filed": false,
+        "github_issue_blocked_reason": "github-mcp unavailable; cannot file operator-flagged issue programmatically.",
+        "consecutive_failed_runs": 5,
+        "first_failed_run": "2026-05-21"
+      },
+      "timestamp": "2026-06-04T13:00:00+00:00"
+    },
+    {
+      "event_type": "scheduled_run_completed",
+      "reason": "Scheduled run completed with degraded state save only.",
+      "payload": {
+        "date": "2026-06-04",
+        "outcome": "no_metrics_no_billing_state_saved"
+      },
+      "timestamp": "2026-06-04T13:00:00+00:00"
+    },
+    {
+      "event_type": "evaluation_recorded",
+      "reason": "github_metrics: required connector (github-mcp) not bound; data fetch could not be executed.",
+      "payload": {
+        "task": "github_metrics",
+        "success_score": 0.0,
+        "used_nodes": [
+          "intent_classifier",
+          "github_router",
+          "ledger"
+        ],
+        "notes": "github-mcp unavailable for the 6th consecutive run; no issues/PRs/stars/forks/contributors retrievable."
+      },
+      "timestamp": "2026-06-14T13:00:00+00:00"
+    },
+    {
+      "event_type": "evaluation_recorded",
+      "reason": "billing_reconciliation: stripe-mcp bound and livemode fetch executed cleanly; zero activity in window, no anomalies.",
+      "payload": {
+        "task": "billing_reconciliation",
+        "success_score": 0.95,
+        "used_nodes": [
+          "intent_classifier",
+          "billing_router",
+          "payment_processor",
+          "usage_meter",
+          "ledger"
+        ],
+        "notes": "ViridisNorth acct_1BLyFZDTpwaqE8Ss confirmed livemode. Last 24h: 0 new customers, 0 payment_intents, 0 charges, 0 invoices, 0 disputes/refunds. Trailing 7d holds 1 charge (py_3TgmpWDTpwaqE8Ss20e1Km6r, $75.00, ~4d old) outside the 24h window. Note: list endpoint ignored created range param; used server-side search as authoritative filter."
+      },
+      "timestamp": "2026-06-14T13:00:00+00:00"
+    },
+    {
+      "event_type": "evaluation_recorded",
+      "reason": "conservation_routing: calculation completed cleanly on observed (real) revenue.",
+      "payload": {
+        "task": "conservation_routing",
+        "success_score": 0.9,
+        "used_nodes": [
+          "payment_processor",
+          "conservation_fund_router",
+          "evaluation_engine",
+          "ledger"
+        ],
+        "notes": "25% of $0.00 net completed-payment revenue = $0.00. Calculation only; no money movement."
+      },
+      "timestamp": "2026-06-14T13:00:00+00:00"
+    },
+    {
+      "event_type": "conservation_accumulation",
+      "reason": "Daily conservation fund accrual (calculation only; no money movement).",
+      "payload": {
+        "ledger_line": "2026-06-14: $0.00 (25% of $0.00) accumulated for conservation routing.",
+        "net_revenue_usd": 0.0,
+        "conservation_share_usd": 0.0,
+        "source": "stripe-mcp livemode (ViridisNorth)"
+      },
+      "timestamp": "2026-06-14T13:00:00+00:00"
+    },
+    {
+      "event_type": "operator_flag",
+      "reason": "Partial connector recovery: stripe-mcp now bound (livemode reconciliation succeeded). github-mcp and verdigraph-mcp still unbound; github metrics unavailable and agent state persisted to local store instead of hosted verdigraph-mcp.",
+      "payload": {
+        "bound_connectors": [
+          "stripe-mcp"
+        ],
+        "missing_connectors": [
+          "github-mcp",
+          "verdigraph-mcp"
+        ],
+        "recommendation": "Wire github-mcp to restore metrics; wire verdigraph-mcp to move state off local file. No payment anomalies this run, so no operator-flagged issue required."
+      },
+      "timestamp": "2026-06-14T13:00:00+00:00"
+    },
+    {
+      "event_type": "scheduled_run_completed",
+      "reason": "Scheduled run completed; billing reconciliation clean (zero activity), github metrics degraded (connector unbound).",
+      "payload": {
+        "date": "2026-06-14",
+        "outcome": "billing_clean_zero_activity; github_blocked; state_saved_local"
+      },
+      "timestamp": "2026-06-14T13:00:00+00:00"
+    },
+    {
+      "event_type": "evaluation_recorded",
+      "reason": "github_metrics: required connector (github-mcp) not bound; data fetch could not be executed.",
+      "payload": {
+        "task": "github_metrics",
+        "success_score": 0.0,
+        "used_nodes": [
+          "intent_classifier",
+          "github_router",
+          "ledger"
+        ],
+        "notes": "github-mcp unavailable in this scheduled run; no issue/PR/star/fork/contributor deltas computed. Local git clone showed 0 commits dated 2026-06-14."
+      },
+      "timestamp": "2026-06-15T13:12:09+00:00"
+    },
+    {
+      "event_type": "evaluation_recorded",
+      "reason": "billing_reconciliation: stripe-mcp bound (ViridisNorth acct_1BLyFZDTpwaqE8Ss, livemode); 24h fetch executed cleanly; zero activity in window, no anomalies.",
+      "payload": {
+        "task": "billing_reconciliation",
+        "success_score": 0.95,
+        "used_nodes": [
+          "intent_classifier",
+          "billing_router",
+          "payment_processor",
+          "usage_meter",
+          "ledger"
+        ],
+        "notes": "0 new customers, 0 payment_intents, 0 charges, 0 invoices in trailing 24h (cutoff 2026-06-14T13:12:09Z). No refunds/disputes/>$5k payments. No metered usage >=50 calls; no Stripe write performed."
+      },
+      "timestamp": "2026-06-15T13:12:09+00:00"
+    },
+    {
+      "event_type": "evaluation_recorded",
+      "reason": "conservation_routing: calculation completed cleanly on observed (real) revenue.",
+      "payload": {
+        "task": "conservation_routing",
+        "success_score": 0.9,
+        "used_nodes": [
+          "payment_processor",
+          "conservation_fund_router",
+          "evaluation_engine",
+          "ledger"
+        ],
+        "notes": "Calculation only; no money movement. Net completed revenue $0.00 -> conservation share $0.00."
+      },
+      "timestamp": "2026-06-15T13:12:09+00:00"
+    },
+    {
+      "event_type": "conservation_accumulation",
+      "reason": "Daily conservation fund accrual from net completed-payment revenue (calculation only; no money movement).",
+      "payload": {
+        "line_item": "2026-06-15: $0.00 (25% of $0.00) accumulated for conservation routing.",
+        "date": "2026-06-15",
+        "net_revenue_usd": 0.0,
+        "conservation_usd": 0.0,
+        "window": "rolling_24h"
+      },
+      "timestamp": "2026-06-15T13:12:09+00:00"
+    },
+    {
+      "event_type": "operator_flag",
+      "reason": "Partial connector recovery: stripe-mcp bound (livemode reconciliation succeeded). github-mcp and verdigraph-mcp still unbound; github metrics unavailable and agent state persisted to local store instead of hosted verdigraph-mcp.",
+      "payload": {
+        "bound_connectors": [
+          "stripe-mcp"
+        ],
+        "unbound_connectors": [
+          "github-mcp",
+          "verdigraph-mcp"
+        ],
+        "recommendation": "Wire github-mcp and verdigraph-mcp before next run; consider externalizing state to D1/R2 per open ADR."
+      },
+      "timestamp": "2026-06-15T13:12:09+00:00"
+    },
+    {
+      "event_type": "scheduled_run_completed",
+      "reason": "Scheduled run completed; billing reconciliation clean (zero activity), github metrics degraded (connector unbound), state saved local.",
+      "payload": {
+        "date": "2026-06-15",
+        "outcome": "billing_clean_zero_activity; github_blocked; state_saved_local"
+      },
+      "timestamp": "2026-06-15T13:12:09+00:00"
+    },
+    {
+      "event_type": "operator_flag",
+      "reason": "All three required connectors unbound this session: verdigraph-mcp, github-mcp, stripe-mcp. Only a PayPal connector is present (wrong processor/account; out of scope for Stripe ViridisNorth acct_1BLyFZDTpwaqE8Ss). No live GitHub metrics, no Stripe livemode reconciliation, no hosted state/evaluation submission possible. State persisted to local store.",
+      "payload": {
+        "bound_connectors": [],
+        "unbound_connectors": [
+          "verdigraph-mcp",
+          "github-mcp",
+          "stripe-mcp"
+        ],
+        "note": "Regression vs 2026-06-15 when stripe-mcp was bound. PayPal MCP present but not a substitute.",
+        "recommendation": "Bind verdigraph-mcp, github-mcp, stripe-mcp before next scheduled run; externalize state to D1/R2 per open ADR."
+      },
+      "timestamp": "2026-06-16T13:12:11+00:00"
+    },
+    {
+      "event_type": "evaluation_skipped",
+      "reason": "github_metrics skipped: required connector unbound; no data fetched. No success_score submitted to avoid fabricating metrics.",
+      "payload": {
+        "area": "github_metrics",
+        "status": "blocked_connector_unbound",
+        "date": "2026-06-16"
+      },
+      "timestamp": "2026-06-16T13:12:11+00:00"
+    },
+    {
+      "event_type": "evaluation_skipped",
+      "reason": "billing_reconciliation skipped: required connector unbound; no data fetched. No success_score submitted to avoid fabricating metrics.",
+      "payload": {
+        "area": "billing_reconciliation",
+        "status": "blocked_connector_unbound",
+        "date": "2026-06-16"
+      },
+      "timestamp": "2026-06-16T13:12:11+00:00"
+    },
+    {
+      "event_type": "evaluation_skipped",
+      "reason": "conservation_routing skipped: required connector unbound; no data fetched. No success_score submitted to avoid fabricating metrics.",
+      "payload": {
+        "area": "conservation_routing",
+        "status": "blocked_connector_unbound",
+        "date": "2026-06-16"
+      },
+      "timestamp": "2026-06-16T13:12:11+00:00"
+    },
+    {
+      "event_type": "conservation_accumulation_skipped",
+      "reason": "Conservation 25% calc skipped: net completed-payment revenue could not be fetched (stripe-mcp unbound). No $0.00 line written, since zero revenue cannot be confirmed.",
+      "payload": {
+        "date": "2026-06-16",
+        "net_revenue_usd": null,
+        "conservation_usd": null,
+        "window": "rolling_24h"
+      },
+      "timestamp": "2026-06-16T13:12:11+00:00"
+    },
+    {
+      "event_type": "scheduled_run_completed",
+      "reason": "Scheduled run completed in degraded/blocked mode; all required connectors unbound; no metrics, billing, conservation calc, or evaluations performed; blocked-run entry saved to local state.",
+      "payload": {
+        "date": "2026-06-16",
+        "outcome": "all_connectors_unbound; no_data; state_saved_local"
+      },
+      "timestamp": "2026-06-16T13:12:11+00:00"
     }
-  ]
+  ],
+  "last_run": "2026-06-16T13:12:11+00:00",
+  "agent_id": "viridis-operator"
 }
