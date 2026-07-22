@@ -3,7 +3,7 @@
 // Field-for-field parity with the Python pydantic schemas in verdigraph_mcp/server.py.
 // The hosted MCP boundary takes profiles+task per call (no DEFAULT_PROFILES fall-through).
 
-import { z } from "zod";
+import { z } from "zod/v3";
 
 // ── Pydantic-parity Zod schemas ─────────────────────────────────────────
 export const ComputeProfileSchema = z.object({

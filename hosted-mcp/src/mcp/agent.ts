@@ -7,7 +7,7 @@
 
 import { McpAgent } from "agents/mcp";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z, type ZodRawShape } from "zod";
+import { z, type ZodRawShape } from "zod/v3";
 
 import {
   chooseProfile, ComputeProfileSchema, TaskProfileSchema,

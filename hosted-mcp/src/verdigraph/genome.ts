@@ -1,6 +1,6 @@
 // src/verdigraph/genome.ts — TS port of verdigraph/genome.py.
 
-import { z } from "zod";
+import { z } from "zod/v3";
 
 export const GrowthRulesSchema = z.object({
   create_node_when_task_repeats: z.number().int().min(1).default(5),

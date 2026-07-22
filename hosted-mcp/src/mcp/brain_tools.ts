@@ -4,7 +4,7 @@
 // environment. Every tool call also feeds the live session bus when the
 // caller provides a build_session_id, so the human watches the build happen.
 
-import { z, type ZodRawShape } from "zod";
+import { z, type ZodRawShape } from "zod/v3";
 import type { Env } from "../index";
 
 import { extract, detectFormat } from "../brainbuilder/extractors";

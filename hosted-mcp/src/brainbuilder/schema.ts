@@ -20,7 +20,7 @@
 //  I8  llm_bindings declares at least one provider; each provider is recognised.
 //  I9  Build is reproducible: identical input bytes -> identical content_hash.
 
-import { z } from "zod";
+import { z } from "zod/v3";
 
 export const BRAIN_SCHEMA_VERSION = "brain.v1";
 
