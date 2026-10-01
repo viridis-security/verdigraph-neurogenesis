@@ -34,46 +34,6 @@ jobs:
           python examples/run_demo.py
           python examples/compute_efficiency_demo.py
 
-  # ── TypeScript hosted-MCP (Cloudflare Worker) ─────────────────────────
-  # iter4 H4: vitest + typecheck were previously ungated. This job runs the
-  # full TS suite on every push and PR. Python is also installed here so the
-  # cross-core parity test (tests/parity.test.ts spawns `python3`) actually
-  # executes instead of self-skipping.
-  #
-  # Node 22 is required: the D1 test harness (tests/helpers/d1.ts) uses the
-  # built-in `node:sqlite` module, which is only available on Node >= 22.5.
-  hosted-mcp:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Node 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-
-      - name: Set up Python (for the cross-core parity test)
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install Python package (parity test imports `verdigraph`)
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev]"
-
-      - name: Install hosted-mcp dependencies
-        working-directory: hosted-mcp
-        run: npm ci
-
-      - name: Typecheck
-        working-directory: hosted-mcp
-        run: npm run typecheck
-
-      - name: Test (vitest — includes the cross-core parity test)
-        working-directory: hosted-mcp
-        run: npm test
-
   # ── Secret scan ───────────────────────────────────────────────────────
   # iter4 C2: fail the build if a live Stripe object id (or equivalent live
   # credential) is committed to a tracked file. Length thresholds match real

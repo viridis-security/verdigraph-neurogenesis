@@ -3,7 +3,7 @@
 > Clone this repo, run one script, and within 60 seconds you're building **deterministic, content-addressed brain artifacts** from any agent file — Claude project export, OpenAI Assistant config, raw prompt list, or Verdigraph genome JSON. Pure Python core; zero external services required.
 
 [![python](https://img.shields.io/badge/python-3.10+-blue?style=flat-square)](https://www.python.org)
-[![tests](https://img.shields.io/badge/tests-python%20%C2%B7%20typescript-success?style=flat-square)](#run-the-tests)
+[![tests](https://img.shields.io/badge/tests-python-success?style=flat-square)](#run-the-tests)
 [![license](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20261687.svg)](https://doi.org/10.5281/zenodo.20261687)
 [![Glama](https://glama.ai/mcp/servers/viridis-security/verdigraph-neurogenesis/badges/score.svg)](https://glama.ai/mcp/servers/viridis-security/verdigraph-neurogenesis)
@@ -160,17 +160,14 @@ verdigraph-neurogenesis/
 ├── tests/                        ← pytest, all green on a clean clone
 ├── examples/                     ← runnable demos with fixture genomes
 ├── docs/                         ← canonicalization spec, architecture, invariants
-├── papers/                       ← three companion papers (Zenodo-archived)
-└── hosted-mcp/                   ← OPTIONAL: Cloudflare Workers deployment if you want a hosted instance
+└── papers/                       ← three companion papers (Zenodo-archived)
 ```
 
 ---
 
-## Optional: deploy your own hosted instance
+## Hosted
 
-A reference Cloudflare Workers deployment lives in `hosted-mcp/`. It serves the same deterministic-build pipeline over HTTPS + OAuth 2.1 + PKCE, adds prepaid USD credits via Stripe, and Ed25519-signed compliance attestations. **You do not need this to use the Python core.** It exists because the same protocol can run hosted if you want a shared multi-caller environment. See [hosted-mcp/README.md](hosted-mcp/README.md) for deployment instructions.
-
-A live reference deployment runs at [https://verdigraph.dev](https://verdigraph.dev) — same byte-equivalent pipeline. The local Python implementation is the canonical source; the Worker is a reimplementation for hosting convenience.
+Hosted: verdigraph.dev, paid per call, 25% of net revenue funds conservation. Self-host: the Python MCP server in verdigraph_mcp/
 
 ---
 
@@ -184,20 +181,7 @@ pip install -e ".[dev]"
 pytest -q
 ```
 
-TypeScript hosted-MCP (Cloudflare Worker):
-
-```bash
-cd hosted-mcp
-npm ci
-npm run typecheck
-npm test
-```
-
-Both suites run in CI (`.github/workflows/tests.yml`) on every push and pull
-request: the Python job across 3.10 / 3.11 / 3.12, and the hosted-mcp job on
-Node 22 — where the cross-core `parity.test.ts` executes against a real Python
-install rather than self-skipping. A secret-scan job fails the build if a live
-Stripe identifier is ever committed.
+The Python suite runs in CI (`.github/workflows/tests.yml`) on every push and pull request across Python 3.10 / 3.11 / 3.12. A secret-scan job fails the build if a live Stripe identifier is committed. The hosted service runs its TypeScript and cross-core parity tests in the private service repository.
 
 The `tests/test_brain_parity.py` suite locks the deterministic-build contract — specifically that `b'{"agent_name":"x","purpose":"y","initial_nodes":["a"],"fitness_metrics":["task_success_rate"]}'` produces `brain_id == "RMX124YY916WP0TCSEHFYX7M30"` and `content_hash == "20b9e5be0e5a0d34e564df6d0a554b1232ff9cc3ff309ab8da77a97756602c0c"`. If either side ever drifts, that test fails on the next CI run and we ship the divergence as a deliberate schema bump.
 
