@@ -14,7 +14,7 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
-mcp = ["mcp[cli]>=1.0", "pydantic>=2.0"]
+mcp = ["mcp[cli]>=1,<2", "pydantic>=2.0"]
 
 [project.scripts]
 verdigraph-mcp = "verdigraph_mcp.server:main"
