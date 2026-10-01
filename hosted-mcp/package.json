@@ -16,7 +16,7 @@
     "@cloudflare/workers-oauth-provider": "^0.2.0",
     "@modelcontextprotocol/sdk": "^1.5.0",
     "agents": "^0.12.4",
-    "hono": "^4.6.0",
+    "hono": "^4.13.12",
     "stripe": "^17.0.0",
     "ulid": "^2.3.0",
     "zod": "^4.0.0"
