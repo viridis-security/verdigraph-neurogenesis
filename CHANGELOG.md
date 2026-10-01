@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Move the paid hosted service and business handoff documents to the private `viridis-security/verdigraph-service` repository, pinned to public core commit `8d5c36c012ad65263d5590147603eb6f0cbc194b`. The Python library, local MCP server and companion papers remain open under MIT.
+
 ## [0.3.0] — unreleased (iteration 4: security & production hardening)
 
 Hardening pass to make the paid hosted MCP (`hosted-mcp/`) safe for the Energy
