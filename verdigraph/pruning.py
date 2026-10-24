@@ -13,6 +13,13 @@ class PruningEngine:
         self.genome = genome
         self.graph = graph
         self.ledger = ledger
+        # Edge ids whose pruning was refused by a safety axiom and already logged,
+        # so a persistently weak protected edge is reported once, not on every pass.
+        self._prune_blocked_reported: set[str] = set()
+
+    def _is_protected(self, node_id: str) -> bool:
+        axioms = self.genome.safety_axioms
+        return axioms.disallow_pruning_protected_nodes and node_id in axioms.protected_nodes
 
     def weaken_from_evaluation(self, result: EvaluationResult) -> None:
         rules = self.genome.growth_rules
@@ -45,6 +52,22 @@ class PruningEngine:
             if observations < rules.min_events_before_pruning:
                 continue
             if edge.weight < rules.prune_below_weight and edge.success_rate < 0.3:
+                guarded = [node_id for node_id in key if self._is_protected(node_id)]
+                if guarded:
+                    # Invariants 5 and 6: pruning may reshape routing but must not cut
+                    # routes into or out of a protected (safety) node. Keep the edge and
+                    # log the refusal once so the decision stays auditable.
+                    if edge.id not in self._prune_blocked_reported:
+                        self._prune_blocked_reported.add(edge.id)
+                        self.ledger.record(
+                            "edge_prune_blocked",
+                            "Edge touches a protected node; pruning it would erode a safety boundary.",
+                            edge=edge.id,
+                            protected_nodes=guarded,
+                            weight=edge.weight,
+                            success_rate=edge.success_rate,
+                        )
+                    continue
                 self.graph.remove_edge(*key)
                 self.ledger.record(
                     "edge_pruned",
