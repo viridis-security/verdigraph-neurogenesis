@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.viridis-security/verdigraph-neurogenesis",
-  "description": "Paid hosted MCP for agent-to-agent compute routing and brain-builder workflows. OAuth 2.1 + PKCE auth, Stripe prepaid USD credits, 29 tools (10 free, 19 metered). 25% of net revenue funds verified conservation via a public auditable ledger. Three core invariants machine-checked in Lean 4 via Aristotle (ledger append-only, conservation-share exact, pruning preserves protected nodes).",
+  "description": "Deterministic, content-addressed agent brain artifacts: open-source Python core and hosted MCP",
   "version": "0.1.0",
   "repository": {
     "url": "https://github.com/viridis-security/verdigraph-neurogenesis",
@@ -44,7 +44,7 @@
         "ai-and-machine-learning"
       ],
       "hosting": "hybrid",
-      "language": "typescript",
+      "language": "python",
       "license": "MIT",
       "doi": "10.5281/zenodo.20261687",
       "lean_verified_invariants": [

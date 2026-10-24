@@ -119,7 +119,7 @@ Then in Claude Desktop config (`~/Library/Application Support/Claude/claude_desk
 
 Or in Claude Code: `claude mcp add --transport stdio verdigraph /absolute/path/to/repo/.venv/bin/verdigraph-mcp`.
 
-Restart your client. Your agent now has `verdigraph_*` tools to build/verify/evolve brains directly. No network calls; everything runs on your machine.
+Restart your client. Your agent now has `verdigraph_*` tools to create developmental agents, feed them task evaluations, inspect their graphs and ledgers, and choose compute profiles. Brain artifacts are built with `python -m verdigraph build` (above). No network calls; everything runs on your machine.
 
 ---
 
@@ -127,7 +127,7 @@ Restart your client. Your agent now has `verdigraph_*` tools to build/verify/evo
 
 | Field | What it is | How to verify |
 |---|---|---|
-| `brain_id` | 26-char Crockford-base32; derived from `sha256(input_bytes + b":" + format)` | `python -m verdigraph build --file <same bytes>` — same id every time |
+| `brain_id` | 26-char Crockford-base32; derived from `sha256(input_bytes + b":" + format)` over the exact input bytes, so reformatting a file (whitespace, key order) gives a new id | `python -m verdigraph build --file <same bytes>` — same id every time |
 | `brain_uri` | `verdigraph://brain/<brain_id>` | Self-describing form; safe for content-safety classifiers |
 | `content_hash` | `sha256(canonicalize(brain_body_minus_content_hash))` | See [docs/CANONICALIZATION.md](docs/CANONICALIZATION.md) for the exact algorithm |
 | `input_sha256` | `sha256(raw_input_bytes)` | `sha256sum your_file.json` |
@@ -136,6 +136,8 @@ Restart your client. Your agent now has `verdigraph_*` tools to build/verify/evo
 ### Canonicalization rule (one sentence)
 
 Apply `json.dumps` with `separators=(",", ":")` after recursively sorting every object's keys lexicographically by codepoint and coercing integer-valued floats to integers (matches JavaScript `JSON.stringify` byte-for-byte). UTF-8 encoded before hashing. See `verdigraph/brain.py::canonicalize` (≈ 20 lines, stdlib only).
+
+Identifiers are computed over the exact bytes you submit, so a pretty-printed genome and its minified form get different `brain_id`s. Pin one serialization (for example `jq -c . genome.json`). Test vectors, and a reference implementation that reproduces real hashes, are in [docs/CANONICALIZATION.md](docs/CANONICALIZATION.md).
 
 ---
 
@@ -147,7 +149,7 @@ verdigraph-neurogenesis/
 ├── quickstart.sh                 ← clone → first brain in 60 seconds
 ├── pyproject.toml                ← Python package metadata
 ├── verdigraph/                   ← Python core (no external deps)
-│   ├── brain.py                  ← deterministic build pipeline (extract / canonicalize / verify / evolve)
+│   ├── brain.py                  ← deterministic build pipeline (extract / canonicalize / verify)
 │   ├── cli.py                    ← `python -m verdigraph` CLI
 │   ├── genome.py                 ← AgentGenome / GrowthRules / SafetyAxioms (live-agent runtime)
 │   ├── graph.py                  ← CognitiveGraph / CognitiveNode / CognitiveEdge
@@ -167,7 +169,7 @@ verdigraph-neurogenesis/
 
 ## Hosted
 
-Hosted: verdigraph.dev, paid per call, 25% of net revenue funds conservation. Self-host: the Python MCP server in verdigraph_mcp/
+Hosted: verdigraph.dev, paid per call. Viridis commits 25% of the net revenue it keeps (after creator payouts and pass-through costs) to conservation; the ledger is public at https://verdigraph.dev/conservation/public. Self-host: the Python MCP server in verdigraph_mcp/
 
 ---
 

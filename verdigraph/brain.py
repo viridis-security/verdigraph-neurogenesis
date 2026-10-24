@@ -13,7 +13,9 @@ Public surface:
     sha256_hex(data) -> str
     derive_brain_id(input_bytes, format) -> str
     verify_brain(brain) -> InvariantReport
-    evolve_brain(brain, events) -> Tuple[Brain, List[GrowthLogEntry]]
+
+Brain evolution (the hosted `brain_evolve` tool) is not implemented here. The
+live-agent runtime that grows and prunes graphs is verdigraph.agent.DevelopmentalAgent.
 
 No external dependencies — stdlib only.
 """
