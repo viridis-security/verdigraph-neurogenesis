@@ -33,7 +33,7 @@ and evaluators.
 Viridis LLC is a conservation technology company. Verdigraph is one of three
 interconnected projects we're building:
 
-- **HDFM** — high-density forest management agents
+- **HDFM** — Hierarchical Dendritic Forest Management: graph-based planning of forest corridors
 - **Sentinel / OpenClaw** — auditable security research agents
 - **Energy AI** — compute-aware agents for grid and demand-response
 

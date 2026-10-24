@@ -6,8 +6,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Pruning keeps safety boundaries connected (invariants 5 and 6).** `prune_low_value_edges` no longer removes an edge into or out of a protected node while `disallow_pruning_protected_nodes` is set. Each refusal is logged once as `edge_prune_blocked`.
+- **Ledger-on-mutation is enforced (invariant 2).** `process_evaluation` raises if a growth or pruning step changes the graph (nodes added, removed or re-statused; edges added, removed or re-weighted) without a ledger event naming the change. `require_growth_logging` and `require_pruning_logging` now control this check; they had no effect before.
+- `brain.py` no longer advertises an `evolve_brain` function it does not implement.
+
+### Added
+
+- `docs/CANONICALIZATION.md`: how `brain_id` and `content_hash` are computed, canonical JSON (including JavaScript number formatting), Python and TypeScript reference implementations, and three test vectors verified against verdigraph.dev. `tests/test_canonicalization_doc.py` runs the printed reference against the vectors, so the document cannot drift from the code.
+- Tests for edge and node pruning and for unlogged mutations.
+
 ### Changed
 
+- `server.json` description shortened to the MCP registry's 100-character limit; package language corrected to Python.
+- README: identifiers are byte-addressed (pin one serialization); the local MCP server's tools are described accurately; the hosted conservation commitment is stated as 25% of the net revenue Viridis keeps.
+- VISION.md: HDFM is Hierarchical Dendritic Forest Management.
 - Move the paid hosted service and business handoff documents to the private `viridis-security/verdigraph-service` repository, pinned to public core commit `8d5c36c012ad65263d5590147603eb6f0cbc194b`. The Python library, local MCP server and companion papers remain open under MIT.
 
 ## [0.3.0] — unreleased (iteration 4: security & production hardening)
