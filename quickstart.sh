@@ -47,11 +47,11 @@ fi
 python -m verdigraph build --file "$GENOME_FILE" --format verdigraph_genome --summary --pretty
 
 green "▶ 4/4  (optional) Confirming byte-equivalence with verdigraph.dev hosted Worker"
-if command -v curl >/dev/null 2>&1; then
+if [[ "${VERDIGRAPH_VERIFY_HOSTED:-0}" == "1" ]] && command -v curl >/dev/null 2>&1; then
   LOCAL_ID=$(python -m verdigraph build --file "$GENOME_FILE" --format verdigraph_genome --summary | python3 -c "import json,sys; print(json.load(sys.stdin)['brain_id'])")
   REMOTE_ID=$(curl -sS --max-time 5 -X POST https://verdigraph.dev/app/import \
     -H 'content-type: application/json' \
-    -d "$(python3 -c "import json; print(json.dumps({'format':'verdigraph_genome','content':open('$GENOME_FILE').read()}))")" \
+    -d "$(python3 -c 'import json,sys; print(json.dumps({"format":"verdigraph_genome","content":open(sys.argv[1]).read()}))' "$GENOME_FILE")" \
     2>/dev/null \
     | python3 -c "import json,sys; d=json.load(sys.stdin); print(d['preview']['brain_id'] if 'preview' in d else '')" 2>/dev/null || echo "")
   if [[ -n "$REMOTE_ID" && "$LOCAL_ID" == "$REMOTE_ID" ]]; then

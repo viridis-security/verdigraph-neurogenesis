@@ -51,6 +51,9 @@ def cmd_build(args: argparse.Namespace) -> int:
 
 def cmd_verify(args: argparse.Namespace) -> int:
     body = json.loads(Path(args.file).read_text())
+    # Accept both the CLI build envelope and a raw brain artifact.
+    if isinstance(body, dict) and isinstance(body.get("brain"), dict):
+        body = body["brain"]
     # Rebuild the Brain from the JSON (best-effort) and re-run invariants.
     from dataclasses import is_dataclass
     from verdigraph.brain import (
