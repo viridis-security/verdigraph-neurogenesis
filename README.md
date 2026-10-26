@@ -20,7 +20,13 @@ bash quickstart.sh
 
 That's it. The script creates a venv, installs the package editable, runs the brain builder against an example genome, and prints the deterministic `brain_id` + `content_hash`. **No Cloudflare account, no Stripe key, no `verdigraph.dev` account needed.** Everything runs locally.
 
-If you also have an internet connection, the script will additionally hit `https://verdigraph.dev/app/import` with the same input bytes and confirm the hosted Worker produces the exact same `brain_id` — that's your proof the local build is byte-equivalent to the production reference implementation.
+The default quickstart builds the bundled synthetic example locally and makes no hosted comparison request. Setup still uses pip to install the package and development dependencies. To compare that synthetic example with the hosted Worker, explicitly opt in:
+
+```bash
+VERDIGRAPH_VERIFY_HOSTED=1 bash quickstart.sh
+```
+
+This sends the bundled example to `https://verdigraph.dev/app/import` and compares the returned `brain_id`. Use the local build commands below for private agent files; do not substitute private inputs into the hosted comparison.
 
 ---
 
