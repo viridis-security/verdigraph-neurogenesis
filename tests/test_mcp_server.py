@@ -1,8 +1,7 @@
 """End-to-end tests for the Verdigraph MCP layer.
 
-These call the tool handlers directly (via the FastMCP registry) so we
-exercise the same code path Claude/Cowork would, without spinning up a
-real stdio transport.
+These exercise both the FastMCP registry and the underlying tool handlers,
+without spinning up a real stdio transport.
 """
 
 from __future__ import annotations
@@ -59,6 +58,32 @@ def _genome(name: str = "Test Agent") -> dict:
         "initial_nodes": ["planner", "tool_router", "safety_checker", "evaluation_engine", "ledger"],
         "fitness_metrics": ["task_success"],
     }
+
+
+def test_fastmcp_registration_and_tool_call():
+    """The installed optional SDK must register and dispatch our typed tools."""
+    from verdigraph_mcp import server
+
+    def text_payload(result):
+        # SDK 1.x may also return structured content alongside text blocks.
+        content = result[0] if isinstance(result, tuple) else result
+        return json.loads(content[0].text)
+
+    async def exercise_registry():
+        tools = {tool.name: tool for tool in await server.mcp.list_tools()}
+        assert "params" in tools["verdigraph_create_agent"].inputSchema["properties"]
+        created = await server.mcp.call_tool(
+            "verdigraph_create_agent",
+            {"params": {"genome": _genome("SDK compatibility agent")}},
+        )
+        agent_id = text_payload(created)["agent_id"]
+        listing = await server.mcp.call_tool("verdigraph_list_agents", {})
+        assert any(
+            agent["agent_id"] == agent_id
+            for agent in text_payload(listing)["agents"]
+        )
+
+    asyncio.run(exercise_registry())
 
 
 def test_create_list_and_get_summary():
