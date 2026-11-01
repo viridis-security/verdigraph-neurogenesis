@@ -9,6 +9,10 @@ updates:
   cooldown:
     default-days: 7
   ignore:
+  # Keep optional installs on the FastMCP API implemented by this adapter.
+  - dependency-name: mcp
+    versions:
+    - '>=2'
   - dependency-name: '*'
     update-types:
     - version-update:semver-major

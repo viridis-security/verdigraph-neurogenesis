@@ -14,6 +14,7 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
+# The stdio adapter uses the SDK 1.x FastMCP API; SDK 2 requires a migration.
 mcp = ["mcp[cli]>=1,<2", "pydantic>=2.0"]
 
 [project.scripts]

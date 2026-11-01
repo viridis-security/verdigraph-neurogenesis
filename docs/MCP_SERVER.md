@@ -15,6 +15,11 @@ pip install -e ".[mcp]"
 This adds the `mcp[cli]` and `pydantic` dependencies and registers an
 `verdigraph-mcp` console script.
 
+The optional adapter supports the MCP Python SDK **1.x** (`mcp>=1,<2`) on
+Python 3.10–3.12. SDK 2 removes the `mcp.server.fastmcp` API used here;
+installing it requires a separate adapter migration. Keep the package's
+upper bound when updating dependencies. The core library needs no MCP SDK.
+
 ## Run
 
 ```bash
